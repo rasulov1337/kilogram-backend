@@ -16,7 +16,7 @@
 
     </div>
 
-    <div class="block users-block">
+    <div class="block users-block block-padding">
         {% for r in order.recipients %}
             <div class="user-card">
                 <img class="avatar" src="{{ r.avatar }}" alt="User">
@@ -32,7 +32,7 @@
     </div>
 
 
-    <div class="block">
+    <div class="block block-padding">
         <h2>Файлы</h2>
 
         <div class="center-btn-wrapper">
@@ -56,13 +56,13 @@
                 </svg>
             </div>
 
-{#            <div class="d-flex flex-column">#}
-{#                <span class="filename">linal_rk1_reshenie_biletov.pdf</span>#}
-{#                <div>#}
-{#                    <span class="grey-text">PDF</span>#}
-{#                    <span class="grey-text">11.1 MB</span>#}
-{#                </div>#}
-{#            </div>#}
+            <div class="d-flex flex-column">
+                <span class="filename">linal_rk1_reshenie_biletov.pdf</span>
+                <div>
+                    <span class="grey-text">PDF</span>
+                    <span class="grey-text">11.1 MB</span>
+                </div>
+            </div>
         </div>
 
     </div>
