@@ -1,0 +1,22 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+    <div class="block users-block">
+
+        <form action="{% url 'index' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="text" id="name" name="search_query" minlength="1" maxlength="70" size="10" placeholder="Поиск">
+            {#            <input type="button" value="Submit">#}
+        </form>
+
+
+        {% for recipient_data in recipients %}
+            {% include "layouts/user-card.html" with data=recipient_data %}
+            <div class="hr"></div>
+        {% endfor %}
+    </div>
+
+    {% include 'layouts/basket.html' %}
+
+
+{% endblock %}

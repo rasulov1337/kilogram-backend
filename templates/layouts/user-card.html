@@ -1,0 +1,9 @@
+<a href="{% url 'profile' data.id %}" class="user-card clickable-user-card">
+    <img class="avatar" src="{{ data.avatar }}" alt="User">
+    <div class="user-info">
+        <div class="name">{{ data.name }}</div>
+{#        <p class="last-message-sent-date-text">8 сен</p>#}
+        <p class="grey-text">{{ data.phone }}</p>
+{#        <button class="btn">Добавить</button>#}
+    </div>
+</a>
