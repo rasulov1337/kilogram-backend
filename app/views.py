@@ -77,7 +77,7 @@ RECIPIENTS = [
     }
 ]
 
-ORDERS = {
+SEND_QUEUES = {
     1: {
         'id': 1,
         'files': [],
@@ -100,17 +100,17 @@ def index(request):
         recipients.extend(RECIPIENTS)
 
     return render(request, 'index.html', {
-        'order': ORDERS[1],
+        'order': SEND_QUEUES[1],
         'recipients': recipients,
         'recipients_count': len(recipients)
     })
 
 
 def order(request, order_id):
-    if order_id not in ORDERS:
+    if order_id not in SEND_QUEUES:
         return HttpResponse('Wrong order_id')
     return render(request, 'order.html', {
-        'order': ORDERS[order_id]
+        'order': SEND_QUEUES[order_id]
     })
 
 

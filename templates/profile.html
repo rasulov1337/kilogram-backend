@@ -1,7 +1,7 @@
 {% extends "layouts/base.html" %}
 
 {% block content %}
-    <div class="block main-info recipients-list">
+    <div class="block main-info block-padding">
         <div class="user-card user-main-info">
             <img class="avatar avatar-offset" src="{{ profile.avatar }}" alt="User">
             <div class="user-info">
@@ -11,7 +11,7 @@
         </div>
     </div>
 
-    <div class="block add-info recipients-list">
+    <div class="block add-info block-padding">
         <p>День рождения: <span class="blue-text">{{ profile.birthdate }}</span></p>
         <p>Город: <span class="blue-text">{{ profile.city }}</span></p>
         <p>Телефон: <span class="blue-text">{{ profile.phone }}</span></p>
