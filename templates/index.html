@@ -5,8 +5,8 @@
 
         <form action="{% url 'index' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <input type="text" id="name" name="search_query" minlength="1" maxlength="70" size="10" placeholder="Поиск">
-            {#            <input type="button" value="Submit">#}
+            <input type="text" id="name" name="search_query" minlength="1" maxlength="70" size="10"
+                    {% if old_query %} value="{{ old_query }}" {% endif %} placeholder="Поиск">
         </form>
 
 

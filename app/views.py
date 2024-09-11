@@ -80,7 +80,13 @@ RECIPIENTS = [
 SEND_QUEUES = {
     1: {
         'id': 1,
-        'files': [],
+        'files': [
+            {
+                'name': 'some_file_name.pdf',
+                'size': '12 MB',
+                'format': 'PDF'
+            }
+        ],
         'recipients': RECIPIENTS[:3],
         'recipients_num': 3
     }
@@ -90,11 +96,12 @@ SEND_QUEUES = {
 @csrf_protect
 def index(request):
     recipients = []
+    search_query = ''
 
     if request.method == 'POST':
-        search_query = request.POST['search_query'].lower()
+        search_query = request.POST['search_query']
         for i in RECIPIENTS:
-            if i['name'].lower().startswith(search_query):
+            if i['name'].lower().startswith(search_query.lower()):
                 recipients.append(i)
     else:
         recipients.extend(RECIPIENTS)
@@ -102,7 +109,8 @@ def index(request):
     return render(request, 'index.html', {
         'order': SEND_QUEUES[1],
         'recipients': recipients,
-        'recipients_count': len(recipients)
+        'recipients_count': len(recipients),
+        'old_query': search_query
     })
 
 
@@ -110,7 +118,7 @@ def order(request, order_id):
     if order_id not in SEND_QUEUES:
         return HttpResponse('Wrong order_id')
     return render(request, 'order.html', {
-        'order': SEND_QUEUES[order_id]
+        'send_queue': SEND_QUEUES[order_id]
     })
 
 

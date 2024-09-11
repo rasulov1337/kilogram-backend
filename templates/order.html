@@ -11,14 +11,14 @@
 
         <div>
             <h4>Текущая заявка</h4>
-            <p class="grey-text">Число получателей: {{ order.recipients_num }}</p>
+            <p class="grey-text">Число получателей: {{ send_queue.recipients_num }}</p>
         </div>
 
     </div>
 
     <div class="block users-block block-padding">
-        {% for r in order.recipients %}
-            <div class="user-card">
+        {% for r in send_queue.recipients %}
+            <a href="{% url 'profile' r.id %}" class="user-card">
                 <img class="avatar" src="{{ r.avatar }}" alt="User">
                 <div class="user-info">
                     <div class="name">{{ r.name }}</div>
@@ -26,7 +26,7 @@
                     <p class="grey-text">{{ r.phone }}</p>
                     {#                    <button class="btn">Удалить</button>#}
                 </div>
-            </div>
+            </a>
             <div class="hr"></div>
         {% endfor %}
     </div>
@@ -35,17 +35,18 @@
     <div class="block block-padding">
         <h2>Файлы</h2>
 
-        <div class="center-btn-wrapper">
-            <button class="transparent-btn">
-                <svg width="69" height="69" viewBox="0 0 69 69" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M34.5 14.375V54.625M14.375 34.5H54.625" stroke="#509AED" stroke-width="4"
-                          stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
+{#        <div class="center-btn-wrapper">#}
+{#            <button class="transparent-btn">#}
+{#                <svg width="69" height="69" viewBox="0 0 69 69" fill="none" xmlns="http://www.w3.org/2000/svg">#}
+{#                    <path d="M34.5 14.375V54.625M14.375 34.5H54.625" stroke="#509AED" stroke-width="4"#}
+{#                          stroke-linecap="round" stroke-linejoin="round"></path>#}
+{#                </svg>#}
+{##}
+{#                Загрузить новый файл#}
+{#            </button>#}
+{#        </div>#}
 
-                Загрузить новый файл
-            </button>
-        </div>
-
+        {% for file in send_queue.files %}
 
         <div class="file-card">
             <div class="svg-container">
@@ -57,13 +58,14 @@
             </div>
 
             <div class="d-flex flex-column">
-                <span class="filename">linal_rk1_reshenie_biletov.pdf</span>
+                <span class="filename">{{ file.name }}</span>
                 <div>
-                    <span class="grey-text">PDF</span>
-                    <span class="grey-text">11.1 MB</span>
+                    <span class="grey-text">{{ file.format }}</span>
+                    <span class="grey-text">{{ file.size }}</span>
                 </div>
             </div>
         </div>
+    {% endfor %}
 
     </div>
 
