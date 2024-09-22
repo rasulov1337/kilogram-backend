@@ -11,13 +11,13 @@
 
         <div>
             <h2>Текущая заявка</h2>
-            <p class="grey-text">Число получателей: {{ send_queue.recipients_num }}</p>
+            <p class="grey-text">Число получателей: {{ process.recipients_num }}</p>
         </div>
 
     </div>
 
     <div class="block users-block block-padding-sm">
-        {% for r in send_queue.recipients %}
+        {% for r in process.recipients %}
             <div class="user-card-long">
                 <img class="avatar-sm" src="{{ r.avatar }}" alt="User">
                 <div class="user-info-long">
@@ -46,7 +46,7 @@
 {#            </button>#}
 {#        </div>#}
 
-        {% for file in send_queue.files %}
+        {% for file in process.files %}
 
         <div class="file-card">
             <div class="svg-container">

@@ -4,8 +4,8 @@
     <div class="block users-block">
 
         <form action="{% url 'index' %}" method="get" >
-            <input class="search-field" type="text" id="name" name="search_query" minlength="1" maxlength="70" size="10"
-                    {% if old_query %} value="{{ old_query }}" {% endif %} placeholder="Поиск">
+            <input class="search-field" type="text" id="name" name="recipient-name" minlength="1" maxlength="70" size="10"
+                    {% if old_recipient_name %} value="{{ old_recipient_name }}" {% endif %} placeholder="Поиск">
         </form>
 
 
@@ -17,7 +17,7 @@
 
     </div>
 
-    {% include 'layouts/basket.html' %}
+    {% include 'layouts/process-info-mini.html' %}
 
 
 {% endblock %}

@@ -23,7 +23,7 @@ from rip import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name='index'),
-    path('order/<int:order_id>', views.order, name='order'),
+    path('sending_process/<int:process_id>', views.sending_process, name='sending-process'),
     path('profile/<int:profile_id>', views.profile, name='profile'),
 ]
 

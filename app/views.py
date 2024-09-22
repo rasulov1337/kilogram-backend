@@ -66,7 +66,7 @@ RECIPIENTS = [
     }
 ]
 
-SEND_QUEUES = {
+PROCESSES = {  # File sending processes
     1: {
         'id': 1,
         'files': [
@@ -84,29 +84,29 @@ SEND_QUEUES = {
 
 def index(request):
     recipients = []
-    search_query = ''
+    recipient_name = ''
 
-    if 'search_query' in request.GET:
-        search_query = request.GET['search_query']
+    if 'recipient-name' in request.GET:
+        recipient_name = request.GET['recipient-name']
         for i in RECIPIENTS:
-            if i['name'].lower().startswith(search_query.lower()):
+            if i['name'].lower().startswith(recipient_name.lower()):
                 recipients.append(i)
     else:
         recipients.extend(RECIPIENTS)
 
     return render(request, 'index.html', {
-        'order': SEND_QUEUES[1],
+        'process': PROCESSES[1],
         'recipients': recipients,
         'recipients_count': len(recipients),
-        'old_query': search_query
+        'old_recipient_name': recipient_name
     })
 
 
-def order(request, order_id):
-    if order_id not in SEND_QUEUES:
+def sending_process(request, process_id):
+    if process_id not in PROCESSES:
         return HttpResponse('Wrong order_id')
-    return render(request, 'order.html', {
-        'send_queue': SEND_QUEUES[order_id]
+    return render(request, 'process.html', {
+        'process': PROCESSES[process_id]
     })
 
 
