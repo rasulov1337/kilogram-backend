@@ -393,6 +393,8 @@ body {
 }
 
 .process-sm-info {
+    max-width: 250px !important;
+    text-wrap: normal;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
