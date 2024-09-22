@@ -2,37 +2,36 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_protect
 
-AVATARS_BASE_URL = 'http://127.0.0.1:9000/launchbox/'
 RECIPIENTS = [
     {
-        'name': 'Johnathan Joestar',
+        'name': 'Джонатан Джостер',
         'id': 1,
         'city': 'Москва',
         'phone': '+7 777 777 7777',
         'uni': 'МГТУ им. Баумана',
         'birthdate': '1 января 2000 г',
         'status': 'Хочу больше лета...',
-        'avatar': AVATARS_BASE_URL + '1.jpg',
+        'avatar': 'http://127.0.0.1:9000/launchbox/1.jpg',
     },
     {
-        'name': 'John Doe',
+        'name': 'Джон Доу',
         'id': 2,
         'city': 'Абу-Даби',
         'phone': '+1 777 777 7777',
         'uni': 'МГТУ им. Баумана',
         'birthdate': '1 мая 2004 г',
         'status': 'Отвечаю вечером',
-        'avatar': AVATARS_BASE_URL + '2.avif',
+        'avatar': 'http://127.0.0.1:9000/launchbox/2.avif',
     },
     {
-        'name': 'Anna Smith',
+        'name': 'Анна Смит',
         'id': 3,
         'city': 'Лондон',
         'phone': '+44 123 456 7890',
         'uni': 'Imperial College London',
         'birthdate': '15 февраля 1999 г',
         'status': 'Занята работой',
-        'avatar': AVATARS_BASE_URL + '3.jpg'
+        'avatar': 'http://127.0.0.1:9000/launchbox/3.jpg'
     },
     {
         'name': 'Алексей Иванов',
@@ -42,37 +41,27 @@ RECIPIENTS = [
         'uni': 'СПбГУ',
         'birthdate': '30 сентября 2001 г',
         'status': 'Жду выходных',
-        'avatar': AVATARS_BASE_URL + '4.avif'
+        'avatar': 'http://127.0.0.1:9000/launchbox/4.avif'
     },
     {
-        'name': 'Maria Gonzalez',
+        'name': 'Мариа Гонзалез',
         'id': 5,
         'city': 'Мадрид',
         'phone': '+34 654 321 987',
         'uni': 'Universidad Complutense de Madrid',
         'birthdate': '8 марта 1998 г',
         'status': 'На конференции',
-        'avatar': AVATARS_BASE_URL + '5.jpg',
+        'avatar': 'http://127.0.0.1:9000/launchbox/5.jpg',
     },
     {
-        'name': 'Chen Wei',
-        'id': 6,
-        'city': 'Пекин',
-        'phone': '+86 10 8888 9999',
-        'uni': 'Peking University',
-        'birthdate': '22 июня 2002 г',
-        'status': 'Студент',
-        'avatar': AVATARS_BASE_URL + '6.jpg',
-    },
-    {
-        'name': 'Oliver Brown',
+        'name': 'Оливер Браун',
         'id': 7,
         'city': 'Нью-Йорк',
         'phone': '+1 212 555 1234',
         'uni': 'New York University',
         'birthdate': '5 ноября 2000 г',
         'status': 'Работаю над проектом',
-        'avatar': AVATARS_BASE_URL + '7.jpg',
+        'avatar': 'http://127.0.0.1:9000/launchbox/7.jpg',
 
     }
 ]
@@ -82,8 +71,8 @@ SEND_QUEUES = {
         'id': 1,
         'files': [
             {
-                'name': 'some_file_name.pdf',
-                'size': '12 MB',
+                'name': 'linal_rk1_reshenie_biletov.pdf',
+                'size': '11.1 MB',
                 'format': 'PDF'
             }
         ],
@@ -93,13 +82,12 @@ SEND_QUEUES = {
 }
 
 
-@csrf_protect
 def index(request):
     recipients = []
     search_query = ''
 
-    if request.method == 'POST':
-        search_query = request.POST['search_query']
+    if 'search_query' in request.GET:
+        search_query = request.GET['search_query']
         for i in RECIPIENTS:
             if i['name'].lower().startswith(search_query.lower()):
                 recipients.append(i)

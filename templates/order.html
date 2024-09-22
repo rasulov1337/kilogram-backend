@@ -10,30 +10,30 @@
         </svg>
 
         <div>
-            <h4>Текущая заявка</h4>
+            <h2>Текущая заявка</h2>
             <p class="grey-text">Число получателей: {{ send_queue.recipients_num }}</p>
         </div>
 
     </div>
 
-    <div class="block users-block block-padding">
+    <div class="block users-block block-padding-sm">
         {% for r in send_queue.recipients %}
-            <a href="{% url 'profile' r.id %}" class="user-card">
-                <img class="avatar" src="{{ r.avatar }}" alt="User">
-                <div class="user-info">
-                    <div class="name">{{ r.name }}</div>
-                    {#                    <p class="last-message-sent-date-text">8 сен</p>#}
+            <div class="user-card-long">
+                <img class="avatar-sm" src="{{ r.avatar }}" alt="User">
+                <div class="user-info-long">
+                    <a href="{% url 'profile' r.id %}" class="name">{{ r.name }}</a>
                     <p class="grey-text">{{ r.phone }}</p>
+                    <input type="text" class="input-comment" placeholder="Добавить комментарий...">
                     {#                    <button class="btn">Удалить</button>#}
                 </div>
-            </a>
+            </div>
             <div class="hr"></div>
         {% endfor %}
     </div>
 
 
-    <div class="block block-padding">
-        <h2>Файлы</h2>
+    <div class="block block-padding p-m">
+        <h1>Файлы</h1>
 
 {#        <div class="center-btn-wrapper">#}
 {#            <button class="transparent-btn">#}
