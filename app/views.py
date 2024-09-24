@@ -14,12 +14,10 @@ def index(request):
     else:
         recipients.extend(Recipient.objects.all())
 
-    process = FileSendingProcess.objects.filter(status='DRF', sender=request.user.id).first()
-
     draft = FileSendingProcess.objects.get_draft(request.user.id)
 
     return render(request, 'index.html', {
-        'process': process,
+        'process': draft,
         'recipients': recipients,
         'recipients_num': len(draft.recipients.all()) if draft else None,
         'old_recipient_name': recipient_name
@@ -36,18 +34,8 @@ def add_to_process(request, recipient_id: int):
     return redirect('index')
 
 
-def del_from_process(request, recipient_id: int):
-    process = FileSendingProcess.objects.get_draft(request.user.id)
-    if not process:
-        process = FileSendingProcess.objects.create(status='DRF', sender=request.user)
-    recipient = get_object_or_404(Recipient, id=recipient_id)
-    process.recipients.remove(recipient)
-    process.save()
-    return redirect('draft-process')
-
-
-def draft_process(request):
-    process = FileSendingProcess.objects.get_draft(request.user.id)
+def process(request, process_id: int):
+    process = get_object_or_404(FileSendingProcess, id=process_id)
     if not process:
         return redirect('index')
 
@@ -59,16 +47,12 @@ def draft_process(request):
     })
 
 
-def del_draft(request):
+def del_process(request, process_id: int):
     with connection.cursor() as cursor:
-        cursor.execute("UPDATE app_filesendingprocess SET status='DEL' WHERE status!='DEL' and sender_id=%s",
-                       [request.user.id])
+        cursor.execute("UPDATE app_filesendingprocess SET status='DEL' WHERE id=%s",
+                       [process_id])
 
     return redirect('index')
-
-
-def process(request, process_id):
-    pass
 
 
 def profile(request, profile_id):

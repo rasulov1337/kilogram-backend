@@ -35,6 +35,9 @@ class File(models.Model):
     format = models.CharField(max_length=8)
     size = models.IntegerField()  # In Bytes
 
+    def __str__(self):
+        return self.url
+
 
 class FileSendingProcess(models.Model):
     STATUS_CHOICES = [
@@ -60,6 +63,9 @@ class FileSendingProcess(models.Model):
             models.UniqueConstraint(fields=['sender'], condition=models.Q(status='draft'),
                                     name='unique_draft_per_sender')
         ]
+
+    def __str__(self):
+        return self.status + ' ' + self.sender.recipient.name + ' ' + self.created_at.strftime('%Y-%m-%d %H:%M')
 
 
 class FileSendingProcessRecipient(models.Model):
