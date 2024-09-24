@@ -32,6 +32,7 @@ class FileSendingProcess(models.Model):
     completed_at = models.DateTimeField(blank=True, null=True)
     sender = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='sender')
     moderator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='moderator')
+    recipients = models.ManyToManyField(Recipient, through="FileSendingProcessRecipient")
 
     class Meta:
         constraints = [
@@ -50,3 +51,8 @@ class FileSendingProcessRecipient(models.Model):
             models.UniqueConstraint(fields=['file_sending_process', 'recipient', 'comment'],
                                     name='unique_proc_recipient_comment')
         ]
+
+
+class File:
+    url = models.URLField()
+    size = models.FloatField()
