@@ -11,7 +11,7 @@ class Recipient(models.Model):
     ]
     name = models.CharField(max_length=90)
     desc = models.CharField(max_length=140, blank=True)
-    phone = models.CharField(max_length=18)
+    phone = models.CharField(max_length=18, unique=True)
     city = models.CharField(max_length=40)
     birthdate = models.DateField(blank=True, null=True)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES)
