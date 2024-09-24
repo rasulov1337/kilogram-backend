@@ -11,20 +11,25 @@
 
         <div>
             <h2>Текущий процесс отправки файлов</h2>
-            <p class="grey-text">Число получателей: {{ process.recipients_num }}</p>
+            <p class="grey-text">Число получателей: {{ recipients_num }}</p>
         </div>
 
     </div>
 
     <div class="block users-block block-padding-sm">
-        {% for r in process.recipients %}
+        {% for r in recipients %}
             <div class="user-card-long">
                 <img class="avatar-sm" src="{{ r.avatar }}" alt="User">
                 <div class="user-info-long">
                     <a href="{% url 'profile' r.id %}" class="name">{{ r.name }}</a>
                     <p class="grey-text">{{ r.phone }}</p>
-                    <input type="text" class="input-comment" placeholder="Добавить комментарий...">
-                    {#                    <button class="btn">Удалить</button>#}
+                    <div class="long-card-input-elems">
+                        <input type="text" class="input-comment" placeholder="Добавить комментарий...">
+                        <form action="{% url 'del-from-process' r.id %}" method="post">
+                            {% csrf_token %}
+                            <button class="btn">Удалить</button>
+                        </form>
+                    </div>
                 </div>
             </div>
             <div class="hr"></div>
@@ -35,43 +40,45 @@
     <div class="block block-padding p-m">
         <h1>Файлы</h1>
 
-{#        <div class="center-btn-wrapper">#}
-{#            <button class="transparent-btn">#}
-{#                <svg width="69" height="69" viewBox="0 0 69 69" fill="none" xmlns="http://www.w3.org/2000/svg">#}
-{#                    <path d="M34.5 14.375V54.625M14.375 34.5H54.625" stroke="#509AED" stroke-width="4"#}
-{#                          stroke-linecap="round" stroke-linejoin="round"></path>#}
-{#                </svg>#}
-{##}
-{#                Загрузить новый файл#}
-{#            </button>#}
-{#        </div>#}
+        {#        <div class="center-btn-wrapper">#}
+        {#            <button class="transparent-btn">#}
+        {#                <svg width="69" height="69" viewBox="0 0 69 69" fill="none" xmlns="http://www.w3.org/2000/svg">#}
+        {#                    <path d="M34.5 14.375V54.625M14.375 34.5H54.625" stroke="#509AED" stroke-width="4"#}
+        {#                          stroke-linecap="round" stroke-linejoin="round"></path>#}
+        {#                </svg>#}
+        {##}
+        {#                Загрузить новый файл#}
+        {#            </button>#}
+        {#        </div>#}
 
         {% for file in process.files %}
 
-        <div class="file-card">
-            <div class="svg-container">
-                <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                            d="M39 6H18C16.4087 6 14.8826 6.63214 13.7574 7.75736C12.6321 8.88258 12 10.4087 12 12V60C12 61.5913 12.6321 63.1174 13.7574 64.2426C14.8826 65.3679 16.4087 66 18 66H54C55.5913 66 57.1174 65.3679 58.2426 64.2426C59.3679 63.1174 60 61.5913 60 60V27M39 6L60 27M39 6V27H60"
-                            stroke="#808080" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
-            </div>
+            <div class="file-card">
+                <div class="svg-container">
+                    <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                                d="M39 6H18C16.4087 6 14.8826 6.63214 13.7574 7.75736C12.6321 8.88258 12 10.4087 12 12V60C12 61.5913 12.6321 63.1174 13.7574 64.2426C14.8826 65.3679 16.4087 66 18 66H54C55.5913 66 57.1174 65.3679 58.2426 64.2426C59.3679 63.1174 60 61.5913 60 60V27M39 6L60 27M39 6V27H60"
+                                stroke="#808080" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </div>
 
-            <div class="d-flex flex-column">
-                <span class="filename">{{ file.name }}</span>
-                <div>
-                    <span class="grey-text">{{ file.format }}</span>
-                    <span class="grey-text">{{ file.size }}</span>
+                <div class="d-flex flex-column">
+                    <span class="filename">{{ file.name }}</span>
+                    <div>
+                        <span class="grey-text">{{ file.format }}</span>
+                        <span class="grey-text">{{ file.size }}</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
 
     </div>
 
-    {#    <div class="buttons-container">#}
-    {#        <button class="grey-btn">Удалить заявку</button>#}
-    {#        <button class="btn">Отправить файлы</button>#}
-    {#    </div>#}
+    <div class="buttons-container">
+        <form action="{% url 'del-draft' %}">
+            <button class="grey-btn">Удалить черновик</button>
+        </form>
+        {#            <button class="btn">Отправить файлы</button>#}
+    </div>
 
 {% endblock %}

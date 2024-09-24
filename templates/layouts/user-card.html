@@ -1,9 +1,12 @@
-<a href="{% url 'profile' data.id %}" class="user-card clickable-user-card">
+<div class="user-card">
     <img class="avatar" src="{{ data.avatar }}" alt="User">
+
     <div class="user-info">
-        <div class="name">{{ data.name }}</div>
-{#        <p class="last-message-sent-date-text">8 сен</p>#}
+        <a href="{% url 'profile' data.id %}" class="name underline-on-hover">{{ data.name }}</a>
         <p class="grey-text">{{ data.phone }}</p>
-{#        <button class="btn">Добавить</button>#}
+        <form action="{% url 'add-to-process' data.id %}" method="post">
+            {% csrf_token %}
+            <button class="btn">Добавить</button>
+        </form>
     </div>
-</a>
+</div>

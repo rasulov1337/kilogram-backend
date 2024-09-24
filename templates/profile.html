@@ -15,7 +15,7 @@
         <p>День рождения: <span class="blue-text">{{ profile.birthdate }}</span></p>
         <p>Город: <span class="blue-text">{{ profile.city }}</span></p>
         <p>Телефон: <span class="blue-text">{{ profile.phone }}</span></p>
-        <p>ВУЗ: <span class="blue-text">{{ profile.uni }}</span></p>
+        {% if profile.uni %}<p>ВУЗ: <span class="blue-text">{{ profile.uni }}</span></p> {% endif %}
     </div>
 
 {% endblock %}

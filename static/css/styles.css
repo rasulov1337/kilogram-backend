@@ -5,6 +5,7 @@
     --big-avatar-size: 170px;
     --avatar-size: 180px;
     --avatar-size-sm: 130px;
+    --btn-font-size: 17px;
 }
 
 
@@ -82,6 +83,7 @@ body {
     min-height: auto;
     padding: 0 10px;
     gap: 10px;
+    grid-auto-rows: 1fr;
 }
 
 .block-padding {
@@ -106,6 +108,7 @@ body {
     font-weight: 500;
     font-style: normal;
     border-radius: 11px;
+    font-size: var(--btn-font-size);
 }
 
 .grey-btn:hover {
@@ -114,14 +117,19 @@ body {
 
 .btn {
     background: #d9d9d9;
+    min-width: 140px;
+    width: fit-content;
+    height: 35px;
     color: black;
     border: none;
     border-radius: 11px;
-    padding: 8px 15px;
+    padding: 8px 10px;
+    cursor: pointer;
 
-    font-optical-sizing: auto;
+    font-size: var(--btn-font-size);
     font-weight: 500;
     font-style: normal;
+    flex-grow: 0;
 }
 
 
@@ -129,15 +137,17 @@ body {
     gap: 25px;
     margin: 20px auto;
     width: 100%;
-    height: 390px;
+    max-width: 100%;
+    min-height: 390px;
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
     align-items: center;
     text-align: center;
-    padding: 0;
+    padding: 10px;
     position: relative;
     border: 1px solid #363738;
+    overflow-wrap: anywhere;
 }
 
 .avatar-sm {
@@ -179,6 +189,10 @@ body {
     font-weight: 500;
 }
 
+.underline-on-hover:hover {
+    text-decoration: underline;
+}
+
 .search-field {
     width: 100%;
     height: 90px;
@@ -200,6 +214,8 @@ body {
     flex-direction: column;
     gap: 20px;
     width: 100%;
+    justify-content: center;
+    align-items: center;
 }
 
 .user-info-long {
@@ -207,6 +223,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    width: 100%;
 }
 
 .user-info-long a:hover {
@@ -266,6 +283,11 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: 10px;
+}
+
+.unavailable {
+    background: #303030;
+    pointer-events: none;
 }
 
 #current-order-full {
@@ -406,8 +428,8 @@ body {
     font-size: 15px;
     font-weight: 500;
     padding: 10px 30px;
-    width: 500px;
-    max-height: 30px;
+    width: 100%;
+    max-height: 35px;
     background-color: #292929;
     border: 1px solid #555555;
     border-radius: 8px;
@@ -415,3 +437,10 @@ body {
     border-bottom: 1px solid #363738;
 }
 
+.long-card-input-elems {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    width: 100%;
+    justify-content: space-between;
+}
