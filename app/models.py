@@ -24,7 +24,16 @@ class Recipient(models.Model):
 
 class FileSendingProcessManager(models.Manager):
     def get_draft(self, user_id: int):
-        return self.get(status='DRF', sender=user_id)
+        try:
+            return self.get(status='DRF', sender=user_id)
+        except self.model.DoesNotExist:
+            return None
+
+
+class File(models.Model):
+    url = models.URLField()
+    format = models.CharField(max_length=8)
+    size = models.IntegerField()  # In Bytes
 
 
 class FileSendingProcess(models.Model):
@@ -42,6 +51,7 @@ class FileSendingProcess(models.Model):
     sender = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='sender')
     moderator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='moderator')
     recipients = models.ManyToManyField(Recipient, through="FileSendingProcessRecipient")
+    files = models.ManyToManyField(File)
 
     objects = FileSendingProcessManager()
 
@@ -62,8 +72,3 @@ class FileSendingProcessRecipient(models.Model):
             models.UniqueConstraint(fields=['file_sending_process', 'recipient', 'comment'],
                                     name='unique_proc_recipient_comment')
         ]
-
-
-class File:
-    url = models.URLField()
-    size = models.FloatField()
