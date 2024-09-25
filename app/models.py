@@ -21,7 +21,7 @@ class Recipient(models.Model):
         return self.name
 
 
-class FileSendingProcessManager(models.Manager):
+class FileTransferManager(models.Manager):
     def get_draft(self, user_id: int):
         try:
             return self.get(status='DRF', sender=user_id)
@@ -55,7 +55,7 @@ class FileTransfer(models.Model):
     moderator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='moderator')
     recipients = models.ManyToManyField(Recipient, through="FileTransferRecipient")
 
-    objects = FileSendingProcessManager()
+    objects = FileTransferManager()
 
     class Meta:
         constraints = [
