@@ -25,7 +25,7 @@
                     <p class="grey-text">{{ r.phone }}</p>
                     <div class="long-card-input-elems">
                         <input type="text" class="input-comment" placeholder="Добавить комментарий...">
-                        {#                        <form action="{% url 'del-from-process' r.id %}" method="post">#}
+                        {#                        <form action="{% url 'del-from-transfer' r.id %}" method="post">#}
                         {#                            {% csrf_token %}#}
                         {#                            <button class="btn">Удалить</button>#}
                         {#                        </form>#}
@@ -51,7 +51,7 @@
         {#            </button>#}
         {#        </div>#}
 
-        {% for file in process.files.all %}
+        {% for file in transfer.files.all %}
 
             <div class="file-card">
                 <div class="svg-container">
@@ -74,7 +74,7 @@
     </div>
 
     <div class="buttons-container">
-        <form action="{% url 'del-process' process.id %}">
+        <form action="{% url 'del-transfer' transfer.id %}">
             <button class="grey-btn">Удалить черновик</button>
         </form>
         {#            <button class="btn">Отправить файлы</button>#}

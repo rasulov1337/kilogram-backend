@@ -4,7 +4,7 @@
     <div class="user-info">
         <a href="{% url 'profile' data.id %}" class="name underline-on-hover">{{ data.name }}</a>
         <p class="grey-text">{{ data.phone }}</p>
-        <form action="{% url 'add-to-process' data.id %}" method="post">
+        <form action="{% url 'add-to-transfer' data.id %}" method="post">
             {% csrf_token %}
             <button class="btn">Добавить</button>
         </form>

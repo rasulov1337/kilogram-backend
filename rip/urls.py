@@ -23,11 +23,10 @@ from rip import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name='index'),
-    path('process/<int:process_id>', views.process, name='process'),
-    path('del-process/<int:process_id>', views.del_process, name='del-process'),
-    path('process/<int:process_id>', views.process, name='process'),
+    path('transfer/<int:process_id>', views.transfer, name='transfer'),
+    path('del-transfer/<int:process_id>', views.del_transfer, name='del-transfer'),
     path('profile/<int:profile_id>', views.profile, name='profile'),
-    path('add_to_process/<int:recipient_id>', views.add_to_process, name='add-to-process'),
+    path('add_to_transfer/<int:recipient_id>', views.add_to_transfer, name='add-to-transfer'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_URL)

@@ -79,7 +79,7 @@ WSGI_APPLICATION = 'rip.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'db',
+        'NAME': 'rip-db',
         'USER': 'admin',
         'PASSWORD': '1234',
         'HOST': 'localhost',

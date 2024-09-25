@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db import connection
 
-from app.models import Recipient, FileSendingProcess
+from app.models import Recipient, FileTransfer
 
 
 def index(request):
@@ -14,42 +14,42 @@ def index(request):
     else:
         recipients.extend(Recipient.objects.all())
 
-    draft = FileSendingProcess.objects.get_draft(request.user.id)
+    draft = FileTransfer.objects.get_draft(request.user.id)
 
     return render(request, 'index.html', {
-        'process': draft,
+        'transfer': draft,
         'recipients': recipients,
         'recipients_num': len(draft.recipients.all()) if draft else None,
         'old_recipient_name': recipient_name
     })
 
 
-def add_to_process(request, recipient_id: int):
-    process = FileSendingProcess.objects.get_draft(request.user.id)
-    if not process:
-        process = FileSendingProcess.objects.create(status='DRF', sender=request.user)
+def add_to_transfer(request, recipient_id: int):
+    transfer = FileTransfer.objects.get_draft(request.user.id)
+    if not transfer:
+        transfer = FileTransfer.objects.create(status='DRF', sender=request.user)
     recipient = get_object_or_404(Recipient, id=recipient_id)
-    process.recipients.add(recipient, through_defaults={})
-    process.save()
+    transfer.recipients.add(recipient, through_defaults={})
+    transfer.save()
     return redirect('index')
 
 
-def process(request, process_id: int):
-    process = get_object_or_404(FileSendingProcess, id=process_id)
-    if not process:
+def transfer(request, process_id: int):
+    transfer = get_object_or_404(FileTransfer, id=process_id)
+    if not transfer:
         return redirect('index')
 
-    recipients = list(process.recipients.all())
-    return render(request, 'process.html', {
-        'process': process,
+    recipients = list(transfer.recipients.all())
+    return render(request, 'transfer.html', {
+        'transfer': transfer,
         'recipients': recipients,
         'recipients_num': len(recipients)
     })
 
 
-def del_process(request, process_id: int):
+def del_transfer(request, process_id: int):
     with connection.cursor() as cursor:
-        cursor.execute("UPDATE app_filesendingprocess SET status='DEL' WHERE id=%s",
+        cursor.execute("UPDATE app_filetransfer SET status='DEL' WHERE id=%s",
                        [process_id])
 
     return redirect('index')

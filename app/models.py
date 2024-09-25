@@ -1,4 +1,3 @@
-import django.db.models
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -34,12 +33,13 @@ class File(models.Model):
     url = models.URLField()
     format = models.CharField(max_length=8)
     size = models.IntegerField()  # In Bytes
+    file_transfer = models.ForeignKey('FileTransfer', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.url
 
 
-class FileSendingProcess(models.Model):
+class FileTransfer(models.Model):
     STATUS_CHOICES = [
         ('DRF', 'Draft'),
         ('DEL', 'Deleted'),
@@ -53,8 +53,7 @@ class FileSendingProcess(models.Model):
     completed_at = models.DateTimeField(blank=True, null=True)
     sender = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='sender')
     moderator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='moderator')
-    recipients = models.ManyToManyField(Recipient, through="FileSendingProcessRecipient")
-    files = models.ManyToManyField(File)
+    recipients = models.ManyToManyField(Recipient, through="FileTransferRecipient")
 
     objects = FileSendingProcessManager()
 
@@ -68,13 +67,13 @@ class FileSendingProcess(models.Model):
         return self.status + ' ' + self.sender.recipient.name + ' ' + self.created_at.strftime('%Y-%m-%d %H:%M')
 
 
-class FileSendingProcessRecipient(models.Model):
-    file_sending_process = models.ForeignKey(FileSendingProcess, on_delete=models.CASCADE)
+class FileTransferRecipient(models.Model):
+    file_transfer = models.ForeignKey(FileTransfer, on_delete=models.CASCADE)
     recipient = models.ForeignKey(Recipient, on_delete=models.CASCADE)
     comment = models.CharField(max_length=200, blank=True)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['file_sending_process', 'recipient', 'comment'],
-                                    name='unique_proc_recipient_comment')
+            models.UniqueConstraint(fields=['file_transfer', 'recipient', 'comment'],
+                                    name='unique_transfer_recipient_comment')
         ]
