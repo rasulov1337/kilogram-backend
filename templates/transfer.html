@@ -2,82 +2,87 @@
 
 {% block content %}
 
-    <div class="block" id="current-order-full">
-        <svg width="95" height="95" viewBox="0 0 95 95" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-                    d="M34.0021 53.4771L61.0375 69.2312M60.9979 25.7687L34.0021 41.5229M83.125 19.7917C83.125 26.35 77.8084 31.6667 71.25 31.6667C64.6916 31.6667 59.375 26.35 59.375 19.7917C59.375 13.2333 64.6916 7.91666 71.25 7.91666C77.8084 7.91666 83.125 13.2333 83.125 19.7917ZM35.625 47.5C35.625 54.0584 30.3084 59.375 23.75 59.375C17.1916 59.375 11.875 54.0584 11.875 47.5C11.875 40.9416 17.1916 35.625 23.75 35.625C30.3084 35.625 35.625 40.9416 35.625 47.5ZM83.125 75.2083C83.125 81.7667 77.8084 87.0833 71.25 87.0833C64.6916 87.0833 59.375 81.7667 59.375 75.2083C59.375 68.6499 64.6916 63.3333 71.25 63.3333C77.8084 63.3333 83.125 68.6499 83.125 75.2083Z"
-                    stroke="#F3F3F3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-        </svg>
+    {% if error %}
+        <h1 class="error-text">{{ error }}</h1>
+    {% else %}
 
-        <div>
-            <h2>Текущий процесс отправки файлов</h2>
-            <p class="grey-text">Число получателей: {{ recipients_num }}</p>
+        <div class="block" id="current-order-full">
+            <svg width="95" height="95" viewBox="0 0 95 95" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                        d="M34.0021 53.4771L61.0375 69.2312M60.9979 25.7687L34.0021 41.5229M83.125 19.7917C83.125 26.35 77.8084 31.6667 71.25 31.6667C64.6916 31.6667 59.375 26.35 59.375 19.7917C59.375 13.2333 64.6916 7.91666 71.25 7.91666C77.8084 7.91666 83.125 13.2333 83.125 19.7917ZM35.625 47.5C35.625 54.0584 30.3084 59.375 23.75 59.375C17.1916 59.375 11.875 54.0584 11.875 47.5C11.875 40.9416 17.1916 35.625 23.75 35.625C30.3084 35.625 35.625 40.9416 35.625 47.5ZM83.125 75.2083C83.125 81.7667 77.8084 87.0833 71.25 87.0833C64.6916 87.0833 59.375 81.7667 59.375 75.2083C59.375 68.6499 64.6916 63.3333 71.25 63.3333C77.8084 63.3333 83.125 68.6499 83.125 75.2083Z"
+                        stroke="#F3F3F3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+
+            <div>
+                <h2>Текущий процесс отправки файлов</h2>
+                <p class="grey-text">Число получателей: {{ recipients_num }}</p>
+            </div>
+
         </div>
 
-    </div>
-
-    <div class="block users-block block-padding-sm">
-        {% for r in recipients %}
-            <div class="user-card-long">
-                <img class="avatar-sm" src="{{ r.avatar }}" alt="User">
-                <div class="user-info-long">
-                    <a href="{% url 'profile' r.id %}" class="name">{{ r.name }}</a>
-                    <p class="grey-text">{{ r.phone }}</p>
-                    <div class="long-card-input-elems">
-                        <input type="text" class="input-comment" placeholder="Добавить комментарий...">
-                        {#                        <form action="{% url 'del-from-transfer' r.id %}" method="post">#}
-                        {#                            {% csrf_token %}#}
-                        {#                            <button class="btn">Удалить</button>#}
-                        {#                        </form>#}
+        <div class="block users-block block-padding-sm">
+            {% for r in recipients %}
+                <div class="user-card-long">
+                    <img class="avatar-sm" src="{{ r.avatar }}" alt="User">
+                    <div class="user-info-long">
+                        <a href="{% url 'profile' r.id %}" class="name">{{ r.name }}</a>
+                        <p class="grey-text">{{ r.phone }}</p>
+                        <div class="long-card-input-elems">
+                            <input type="text" class="input-comment" placeholder="Добавить комментарий...">
+                            {#                        <form action="{% url 'del-from-transfer' r.id %}" method="post">#}
+                            {#                            {% csrf_token %}#}
+                            {#                            <button class="btn">Удалить</button>#}
+                            {#                        </form>#}
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="hr"></div>
-        {% endfor %}
-    </div>
+                <div class="hr"></div>
+            {% endfor %}
+        </div>
 
 
-    <div class="block block-padding p-m">
-        <h1>Файлы</h1>
+        <div class="block block-padding p-m">
+            <h1>Файлы</h1>
 
-        {#        <div class="center-btn-wrapper">#}
-        {#            <button class="transparent-btn">#}
-        {#                <svg width="69" height="69" viewBox="0 0 69 69" fill="none" xmlns="http://www.w3.org/2000/svg">#}
-        {#                    <path d="M34.5 14.375V54.625M14.375 34.5H54.625" stroke="#509AED" stroke-width="4"#}
-        {#                          stroke-linecap="round" stroke-linejoin="round"></path>#}
-        {#                </svg>#}
-        {##}
-        {#                Загрузить новый файл#}
-        {#            </button>#}
-        {#        </div>#}
+            {#        <div class="center-btn-wrapper">#}
+            {#            <button class="transparent-btn">#}
+            {#                <svg width="69" height="69" viewBox="0 0 69 69" fill="none" xmlns="http://www.w3.org/2000/svg">#}
+            {#                    <path d="M34.5 14.375V54.625M14.375 34.5H54.625" stroke="#509AED" stroke-width="4"#}
+            {#                          stroke-linecap="round" stroke-linejoin="round"></path>#}
+            {#                </svg>#}
+            {##}
+            {#                Загрузить новый файл#}
+            {#            </button>#}
+            {#        </div>#}
 
-        {% for file in transfer.files.all %}
+            {% for file in transfer.files.all %}
 
-            <div class="file-card">
-                <div class="svg-container">
-                    <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                                d="M39 6H18C16.4087 6 14.8826 6.63214 13.7574 7.75736C12.6321 8.88258 12 10.4087 12 12V60C12 61.5913 12.6321 63.1174 13.7574 64.2426C14.8826 65.3679 16.4087 66 18 66H54C55.5913 66 57.1174 65.3679 58.2426 64.2426C59.3679 63.1174 60 61.5913 60 60V27M39 6L60 27M39 6V27H60"
-                                stroke="#808080" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-                    </svg>
-                </div>
+                <div class="file-card">
+                    <div class="svg-container">
+                        <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                    d="M39 6H18C16.4087 6 14.8826 6.63214 13.7574 7.75736C12.6321 8.88258 12 10.4087 12 12V60C12 61.5913 12.6321 63.1174 13.7574 64.2426C14.8826 65.3679 16.4087 66 18 66H54C55.5913 66 57.1174 65.3679 58.2426 64.2426C59.3679 63.1174 60 61.5913 60 60V27M39 6L60 27M39 6V27H60"
+                                    stroke="#808080" stroke-width="4" stroke-linecap="round"
+                                    stroke-linejoin="round"></path>
+                        </svg>
+                    </div>
 
-                <div class="d-flex flex-column">
-                    <span class="filename">{{ file.name }}</span>
-                    <div>
-                        <span class="grey-text">{{ file.format }}</span>
-                        <span class="grey-text">{{ file.size }}</span>
+                    <div class="d-flex flex-column">
+                        <span class="filename">{{ file.name }}</span>
+                        <div>
+                            <span class="grey-text">{{ file.format }}</span>
+                            <span class="grey-text">{{ file.size }}</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-        {% endfor %}
-    </div>
+            {% endfor %}
+        </div>
 
-    <div class="buttons-container">
-        <form action="{% url 'del-transfer' transfer.id %}">
-            <button class="grey-btn">Удалить черновик</button>
-        </form>
-        {#            <button class="btn">Отправить файлы</button>#}
-    </div>
-
+        <div class="buttons-container">
+            <form action="{% url 'del-transfer' transfer.id %}">
+                <button class="grey-btn">Удалить</button>
+            </form>
+            {#            <button class="btn">Отправить файлы</button>#}
+        </div>
+    {% endif %}
 {% endblock %}

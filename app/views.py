@@ -1,3 +1,4 @@
+from django.http import Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db import connection
 
@@ -36,6 +37,13 @@ def add_to_transfer(request, recipient_id: int):
 
 def transfer(request, process_id: int):
     transfer = get_object_or_404(FileTransfer, id=process_id)
+    if transfer.status == 'DEL':
+        return render(request,
+                      'transfer.html',
+                      {
+                          'error': 'Невозможно просмотреть данную отправку файлов'
+                      })
+
     if not transfer:
         return redirect('index')
 
