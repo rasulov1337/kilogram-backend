@@ -74,6 +74,6 @@ class FileTransferRecipient(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['file_transfer', 'recipient', 'comment'],
-                                    name='unique_transfer_recipient_comment')
+            models.UniqueConstraint(fields=['file_transfer', 'recipient'],
+                                    name='unique_transfer_recipient')
         ]
