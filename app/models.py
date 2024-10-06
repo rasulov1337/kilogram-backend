@@ -29,16 +29,6 @@ class FileTransferManager(models.Manager):
             return None
 
 
-class File(models.Model):
-    url = models.URLField()
-    format = models.CharField(max_length=8)
-    size = models.IntegerField()  # In Bytes
-    file_transfer = models.ForeignKey('FileTransfer', on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.url
-
-
 class FileTransfer(models.Model):
     STATUS_CHOICES = [
         ('DRF', 'Draft'),
@@ -54,6 +44,7 @@ class FileTransfer(models.Model):
     sender = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='sender')
     moderator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='moderator')
     recipients = models.ManyToManyField(Recipient, through="FileTransferRecipient")
+    file = models.URLField()
 
     objects = FileTransferManager()
 
