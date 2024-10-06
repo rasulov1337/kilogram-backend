@@ -2,3 +2,5 @@
 .idea/
 db.sqlite3
 app/__pycache__/
+rip/__pycache__/
+app/migrations/__pycache__/
