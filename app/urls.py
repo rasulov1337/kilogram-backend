@@ -10,5 +10,4 @@ urlpatterns = [
 
     path('transfers/', views.FileTransferList.as_view(), name='transfers-list'),
     re_path(r'transfers/(?P<transfer_id>\d+)', views.FileTransferDetails.as_view(), name='transfers-details'),
-
 ]

@@ -4,22 +4,19 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Q
 from django.http import Http404
-from django.shortcuts import render, get_object_or_404, redirect
-from django.db import connection
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from minio import Minio
-from rest_framework import status, permissions
+from rest_framework import status
 from rest_framework.decorators import api_view
-from rest_framework.generics import CreateAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from app.models import Recipient, FileTransfer
-
 from app.models import Recipient, FileTransfer, FileTransferRecipient
-from app.serializers import RecipientSerializer, UserSerializer, FileTransferSerializer, FileTransferRecipientSerializer
+from app.serializers import RecipientSerializer, FileTransferSerializer, FileTransferRecipientSerializer
 from rip import settings
+import uuid
 
 
 class UserSingleton:
@@ -47,26 +44,26 @@ class MinioClient:
         return cls._instance
 
 
-def load_img(recipient: Recipient, img: InMemoryUploadedFile):
+def load_file(file: InMemoryUploadedFile):
     client = MinioClient()
 
-    img_obj_name = "%i.png" % recipient.id
+    img_obj_name = str(uuid.uuid4()) + '.' + file.name.split('.')[-1]
 
-    if not img:
-        raise Exception("Не указан путь к изображению")
+    if not file:
+        raise Exception("Не указан путь к файлу")
 
     client.put_object(bucket_name=settings.AWS_STORAGE_BUCKET_NAME,
                       object_name=img_obj_name,
-                      data=img,
-                      length=img.size)
-    url_to_img = 'http://localhost:9000/rip-images/%s' % img_obj_name
+                      data=file,
+                      length=file.size)
+    url_to_img = 'http://localhost:9000/%s/%s' % (settings.AWS_STORAGE_BUCKET_NAME, img_obj_name)
 
     return url_to_img
 
 
-def delete_img(img_name: str):
+def delete_file(file_name: str):
     client = MinioClient()
-    client.remove_object(settings.AWS_STORAGE_BUCKET_NAME, img_name)
+    client.remove_object(settings.AWS_STORAGE_BUCKET_NAME, file_name)
 
 
 class RecipientList(APIView):
@@ -115,7 +112,7 @@ class RecipientDetail(APIView):
         if recipient.status == 'D':
             return Response({"error": "User already deleted"}, status.HTTP_400_BAD_REQUEST)
         try:
-            delete_img(recipient.avatar.split('/')[-1])
+            delete_file(recipient.avatar.split('/')[-1])
         except Exception as e:
             return Response({"error": str(e)}, status.HTTP_500_INTERNAL_SERVER_ERROR)
         recipient.status = 'D'
@@ -154,11 +151,10 @@ class RecipientDetail(APIView):
         recipient = get_object_or_404(Recipient, id=recipient_id)
 
         try:
-            # The image is replaced automatically
-            # if recipient.avatar:
-            #     delete_img(recipient.avatar.split('/')[-1])
+            if recipient.avatar:
+                delete_file(recipient.avatar.split('/')[-1])
 
-            avatar_url = load_img(recipient, avatar)
+            avatar_url = load_file(avatar)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -168,36 +164,6 @@ class RecipientDetail(APIView):
         return Response({"message": "Изображение обновлено",
                          "avatar": avatar_url},
                         status=status.HTTP_200_OK)
-
-
-@api_view(['PUT'])
-def edit(request):
-    pass
-
-
-@api_view(['POST'])
-def signin(request):
-    if UserSingleton.get_instance(user_id=1).is_authenticated:
-        return Response({
-            'error': 'Already authenticated'
-        }, status.HTTP_400_BAD_REQUEST)
-
-    username = request.data.get("username")
-    password = request.data.get("password")
-    user = authenticate(username=username, password=password)
-    if not user:
-        return Response({
-            "error": "Wrong credentials!"
-        }, status.HTTP_401_UNAUTHORIZED)
-
-    return Response({
-        "status": "Success"
-    }, status=status.HTTP_200_OK)
-
-
-@api_view(['POST'])
-def signout(request):
-    pass
 
 
 class FileTransferList(APIView):
@@ -229,15 +195,30 @@ class FileTransferDetails(APIView):
         raise Http404
 
     def edit(self, request: Request, transfer_id: int):
-        transfer = get_object_or_404(self.model_class, id=transfer_id)
+        # First check all new info except for the file
+        transfer: FileTransfer = get_object_or_404(self.model_class, id=transfer_id)
         serializer = self.serializer_class(transfer, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        if transfer.file:
+            delete_file(transfer.file.split('/')[-1])
+
+        serializer.save()
+
+        # Then upload the file
+        file_url = load_file(request.FILES['file_obj'])
+        transfer.file = file_url
+        transfer.save()
+
+        return Response(serializer.data)
 
     def form(self, request: Request, transfer_id: int):
         transfer: FileTransfer = get_object_or_404(self.model_class, id=transfer_id)
+        if transfer.status == 'FRM':
+            return Response({'error': 'The transfer is already formed'}, status.HTTP_400_BAD_REQUEST)
+
         empty_fields = []
         if not transfer.recipients.count():
             empty_fields.append('recipients field is empty')
@@ -254,7 +235,12 @@ class FileTransferDetails(APIView):
         return Response(status=status.HTTP_200_OK)
 
     def complete(self, request: Request, transfer_id: int):
+        # TODO: проверка статуса модера
         transfer: FileTransfer = get_object_or_404(self.model_class, id=transfer_id)
+        if transfer.status == 'REJ' or transfer.status == 'COM':
+            return Response({'error': 'Передача файлов уже сформирована/отклонена!'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
         if transfer.status != 'FRM':
             return Response({'error': 'Передача файлов еще не сформирована!'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -268,15 +254,17 @@ class FileTransferDetails(APIView):
         if empty_fields:
             return Response({'error': empty_fields}, status=status.HTTP_400_BAD_REQUEST)
 
-        if request.data['action'] == 'complete':
+        action = request.data.get('action', None)
+        if action == 'complete':
             transfer.status = 'COM'
-        elif request.data['action'] == 'rejected':
+        elif action == 'rejected':
             transfer.status = 'REJ'
         else:
             return Response({'error': 'No action specified'}, status=status.HTTP_400_BAD_REQUEST)
 
         transfer.completed_at = timezone.now()
         transfer.moderator = UserSingleton.get_instance()
+        FileTransferRecipient.objects.filter(file_transfer=transfer).update(sent_at=timezone.now())
         transfer.save()
         return Response(status=status.HTTP_200_OK)
 

@@ -62,6 +62,7 @@ class FileTransferRecipient(models.Model):
     file_transfer = models.ForeignKey(FileTransfer, on_delete=models.CASCADE)
     recipient = models.ForeignKey(Recipient, on_delete=models.CASCADE)
     comment = models.CharField(max_length=200, blank=True)
+    sent_at = models.DateTimeField(null=True)  # Is calculated on send
 
     class Meta:
         constraints = [
