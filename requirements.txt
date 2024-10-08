@@ -1,2 +1,5 @@
 django
 psycopg2-binary
+djangorestframework
+django-cors-headers
+minio
