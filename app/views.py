@@ -81,9 +81,9 @@ class RecipientList(APIView):
 
         if 'recipient-name' in request.GET:
             recipient_name = request.GET['recipient-name']
-            recipients = self.model_class.objects.filter(name__istartswith=recipient_name)
+            recipients = self.model_class.objects.filter(name__istartswith=recipient_name, status='A')
         else:
-            recipients = self.model_class.objects.all()
+            recipients = self.model_class.objects.filter(status='A')
 
         serializer = self.serializer_class(recipients, many=True)
         data = serializer.data
@@ -92,6 +92,8 @@ class RecipientList(APIView):
 
     # Create a new recipient
     def post(self, request):
+        data = request.data
+        data['user'] = UserSingleton.get_instance().id
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -119,7 +121,7 @@ class RecipientDetail(APIView):
     def delete(self, request, recipient_id):
         recipient = get_object_or_404(self.model_class, id=recipient_id)
         if recipient.status == 'D':
-            return Response({"error": "User already deleted"}, status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Recipient already deleted"}, status.HTTP_400_BAD_REQUEST)
         try:
             delete_file(recipient.avatar.split('/')[-1])
         except Exception as e:
