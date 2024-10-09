@@ -3,7 +3,6 @@ from django.db import models
 
 
 class Recipient(models.Model):
-    # user = models.OneToOneField(User, on_delete=models.CASCADE)
     STATUS_CHOICES = [
         ('A', 'Active'),
         ('D', 'Deleted')
@@ -55,7 +54,7 @@ class FileTransfer(models.Model):
         ]
 
     def __str__(self):
-        return self.status + ' ' + self.sender.recipient.name + ' ' + self.created_at.strftime('%Y-%m-%d %H:%M')
+        return self.status + ' ' + self.sender.get_full_name() + ' ' + self.created_at.strftime('%Y-%m-%d %H:%M')
 
 
 class FileTransferRecipient(models.Model):
