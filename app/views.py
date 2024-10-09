@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
@@ -6,6 +8,8 @@ from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.dateparse import parse_date
+from django.utils.timezone import make_aware
 from minio import Minio
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -176,7 +180,20 @@ class FileTransferList(APIView):
     serializer_class = FileTransferSerializer
 
     def get(self, request):
+        status_filter = formed_at_range = None
+
+        if 'status' in request.GET:
+            status_filter = request.GET['status']
+        if 'formed-at-range' in request.GET:
+            formed_at_range = list(
+                map(lambda x: datetime.strptime(x, "%Y-%m-%d"), request.GET['formed-at-range'].split(',')))
+            formed_at_range[0] = make_aware(formed_at_range[0])
+            formed_at_range[1] = make_aware(formed_at_range[1])
         transfers = self.model_class.objects.filter(~(Q(status='DRF') | Q(status='DEL')))
+        if status_filter:
+            transfers = transfers.filter(status=status_filter)
+        if formed_at_range:
+            transfers = transfers.filter(formed_at__range=formed_at_range)
         serializer = self.serializer_class(transfers, many=True)
         return Response(serializer.data)
 
