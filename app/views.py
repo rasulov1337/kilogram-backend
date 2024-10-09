@@ -75,7 +75,12 @@ class RecipientList(APIView):
         user = UserSingleton.get_instance()
         draft = FileTransfer.objects.get_draft(user.id)
 
-        recipients = self.model_class.objects.all()
+        if 'recipient-name' in request.GET:
+            recipient_name = request.GET['recipient-name']
+            recipients = self.model_class.objects.filter(name__istartswith=recipient_name)
+        else:
+            recipients = self.model_class.objects.all()
+
         serializer = self.serializer_class(recipients, many=True)
         data = serializer.data
         data.append({'draft_id': draft.id if draft else None})
