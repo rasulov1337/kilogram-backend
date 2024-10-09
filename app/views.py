@@ -302,6 +302,7 @@ class FileTransferDetails(APIView):
         if transfer.status == 'DEL':
             return Response({'error': 'Transfer already deleted'}, status.HTTP_400_BAD_REQUEST)
         transfer.status = 'DEL'
+        FileTransferRecipient.objects.filter(file_transfer__id=transfer.id).delete()
         transfer.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
