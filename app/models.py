@@ -3,7 +3,7 @@ from django.db import models
 
 
 class Recipient(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    # user = models.OneToOneField(User, on_delete=models.CASCADE)
     STATUS_CHOICES = [
         ('A', 'Active'),
         ('D', 'Deleted')
