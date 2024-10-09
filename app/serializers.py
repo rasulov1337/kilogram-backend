@@ -34,7 +34,7 @@ class FileTransferSerializer(serializers.ModelSerializer):
         repr = super().to_representation(instance)
         repr['sender'] = User.objects.get(id=repr['sender']).username
         if repr['moderator']:
-            repr['moderator'] = User.objects.get(id=repr['moderator'])
+            repr['moderator'] = User.objects.get(id=repr['moderator']).username
 
         res = []
         for recipient in instance.recipients.all():
@@ -54,4 +54,5 @@ class FileTransferSerializer(serializers.ModelSerializer):
 class FileTransferRecipientSerializer(serializers.ModelSerializer):
     class Meta:
         model = FileTransferRecipient
-        fields = ['id', 'comment']  # TODO: Maybe all?
+        read_only_fields = ['file_transfer', 'recipient', 'sent_at']
+        fields = '__all__'

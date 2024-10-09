@@ -127,12 +127,12 @@ class RecipientDetail(APIView):
         raise Http404
 
     def draft(self, request, recipient_id):
-        if not UserSingleton.get_instance(user_id=1).is_authenticated:
+        if not UserSingleton.get_instance().is_authenticated:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         recipient = get_object_or_404(Recipient, id=recipient_id)
-        draft_transfer = FileTransfer.objects.get_draft(UserSingleton.get_instance(user_id=1).id)
+        draft_transfer = FileTransfer.objects.get_draft(UserSingleton.get_instance().id)
         if not draft_transfer:
-            draft_transfer = FileTransfer.objects.create(status='DRF', sender=UserSingleton.get_instance(user_id=1))
+            draft_transfer = FileTransfer.objects.create(status='DRF', sender=UserSingleton.get_instance())
             draft_transfer.save()
 
         if draft_transfer.recipients.contains(recipient):
@@ -180,18 +180,21 @@ class FileTransferDetails(APIView):
     model_class = FileTransfer
     serializer_class = FileTransferSerializer
 
-    def get(self, request, transfer_id):
+    def get(self, request: Request, transfer_id):
+        if not request.path.split('/')[-1].isdecimal():
+            return Response({'error': 'method not allowed'}, status.HTTP_405_METHOD_NOT_ALLOWED)
+
         transfer = get_object_or_404(self.model_class, id=transfer_id)
         serializer = self.serializer_class(transfer)
         return Response(serializer.data)
 
     def put(self, request: Request, transfer_id):
-        if request.path.endswith('/edit'):
-            return self.edit(request, transfer_id)
-        elif request.path.endswith('/form'):
+        if request.path.endswith('/form'):
             return self.form(request, transfer_id)
         elif request.path.endswith('/complete'):
             return self.complete(request, transfer_id)
+        elif request.path.split('/')[-1].isdecimal():
+            return self.edit(request, transfer_id)
         raise Http404
 
     def edit(self, request: Request, transfer_id: int):
@@ -257,7 +260,7 @@ class FileTransferDetails(APIView):
         action = request.data.get('action', None)
         if action == 'complete':
             transfer.status = 'COM'
-        elif action == 'rejected':
+        elif action == 'reject':
             transfer.status = 'REJ'
         else:
             return Response({'error': 'No action specified'}, status=status.HTTP_400_BAD_REQUEST)
@@ -269,23 +272,33 @@ class FileTransferDetails(APIView):
         return Response(status=status.HTTP_200_OK)
 
     def delete(self, request, transfer_id):
+        if not request.path.split('/')[-1].isdecimal():
+            return Response({'error': 'method not allowed'}, status.HTTP_405_METHOD_NOT_ALLOWED)
         transfer = get_object_or_404(self.model_class, id=transfer_id)
+        if transfer.status == 'DEL':
+            return Response({'error': 'Transfer already deleted'}, status.HTTP_400_BAD_REQUEST)
         transfer.status = 'DEL'
         transfer.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class FileTransferRecipientDetails(APIView):
-    model = FileTransferRecipient
+    model_class = FileTransferRecipient
     serializer_class = FileTransferRecipientSerializer
 
-    def delete(self, id):
-        # TODO: БЕЗ PK?
-        transfer_recipient = get_object_or_404(FileTransferRecipient, id=id)
+    def delete(self, request: Request, transfer_id: int, recipient_id: int):
+        transfer = get_object_or_404(FileTransfer, id=transfer_id)
+        transfer_recipient = get_object_or_404(self.model_class, file_transfer=transfer, recipient__id=recipient_id)
+
         transfer_recipient.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def put(self, id):
-        transfer_recipient = get_object_or_404(FileTransferRecipient, id=id)
-        transfer_recipient.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def put(self, request: Request, transfer_id: int, recipient_id: int):
+        transfer = get_object_or_404(FileTransfer, id=transfer_id)
+        transfer_recipient = get_object_or_404(self.model_class, file_transfer=transfer, recipient__id=recipient_id)
+
+        serializer = self.serializer_class(transfer_recipient, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
