@@ -2,7 +2,7 @@ from django.http import Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db import connection
 
-from app.models import Recipient, FileTransfer
+from app.models import Recipient, FileTransfer, FileTransferRecipient
 
 
 def index(request):
@@ -47,11 +47,17 @@ def transfer(request, process_id: int):
     if not transfer:
         return redirect('index')
 
-    recipients = list(transfer.recipients.all())
+    recipients_data = []
+    for i in transfer.recipients.all():
+        recipients_data.append({
+            'recipient': i,
+            'comment': FileTransferRecipient.objects.get(file_transfer=transfer, recipient=i).comment
+        })
+
     return render(request, 'transfer.html', {
         'transfer': transfer,
-        'recipients': recipients,
-        'recipients_num': len(recipients)
+        'recipients_data': recipients_data,
+        'recipients_num': len(recipients_data)
     })
 
 

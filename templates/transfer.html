@@ -21,15 +21,15 @@
         </div>
 
         <div class="block users-block block-padding-sm">
-            {% for r in recipients %}
+            {% for rd in recipients_data %}
                 <div class="user-card-long">
-                    <img class="avatar-sm" src="{{ r.avatar }}" alt="User">
+                    <img class="avatar-sm" src="{{ rd.recipient.avatar }}" alt="User">
                     <div class="user-info-long">
-                        <a href="{% url 'profile' r.id %}" class="name">{{ r.name }}</a>
-                        <p class="grey-text">{{ r.phone }}</p>
+                        <a href="{% url 'profile' rd.recipient.id %}" class="name">{{ rd.recipient.name }}</a>
+                        <p class="grey-text">{{ rd.recipient.phone }}</p>
                         <div class="long-card-input-elems">
-                            <input type="text" class="input-comment" placeholder="Добавить комментарий...">
-                            {#                        <form action="{% url 'del-from-transfer' r.id %}" method="post">#}
+                            <input type="text" class="input-comment" placeholder="Добавить комментарий..." {%if rd.comment %} value="{{ rd.comment }}" {% endif %}>
+                            {#                        <form action="{% url 'del-from-transfer' rd.recipient.id %}" method="post">#}
                             {#                            {% csrf_token %}#}
                             {#                            <button class="btn">Удалить</button>#}
                             {#                        </form>#}
