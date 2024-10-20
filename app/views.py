@@ -77,7 +77,6 @@ class RecipientList(APIView):
     # Get list of all recipients
     def get(self, request):
         user = UserSingleton.get_instance()
-        draft = FileTransfer.objects.get_draft(user.id)
 
         if 'recipient-name' in request.GET:
             recipient_name = request.GET['recipient-name']
@@ -87,7 +86,10 @@ class RecipientList(APIView):
 
         serializer = self.serializer_class(recipients, many=True)
         data = serializer.data
-        data.append({'draft_id': draft.id if draft else None})
+
+        draft = FileTransfer.objects.get_draft(user.id)
+        if draft:
+            data.append({'draftId': draft.id, 'draftRecipientsLen': len(draft.recipients.all())})
         return Response(data)
 
     # Create a new recipient
@@ -210,7 +212,10 @@ class FileTransferDetails(APIView):
 
         transfer = get_object_or_404(self.model_class, id=transfer_id)
         serializer = self.serializer_class(transfer)
-        return Response(serializer.data)
+
+        data = serializer.data
+        data['recipients'] = self.model_class.objects.get_recipients_info(transfer_id)
+        return Response(data)
 
     def put(self, request: Request, transfer_id):
         if request.path.endswith('/form'):

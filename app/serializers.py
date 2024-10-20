@@ -5,6 +5,8 @@ from rest_framework import serializers
 
 
 class RecipientSerializer(serializers.ModelSerializer):
+    status = serializers.CharField(write_only=True)
+    
     class Meta:
         # Модель, которую мы сериализуем
         model = Recipient
@@ -28,7 +30,7 @@ class UserSerializer(serializers.ModelSerializer):
 class FileTransferSerializer(serializers.ModelSerializer):
     class Meta:
         model = FileTransfer
-        fields = '__all__'
+        fields = ['id', 'status', 'created_at', 'formed_at', 'completed_at', 'sender', 'moderator', 'file']
 
     def to_representation(self, instance):
         repr = super().to_representation(instance)
@@ -36,13 +38,6 @@ class FileTransferSerializer(serializers.ModelSerializer):
         if repr['moderator']:
             repr['moderator'] = User.objects.get(id=repr['moderator']).username
 
-        res = []
-        for recipient in instance.recipients.all():
-            res.append({'id': recipient.id,
-                        'name': recipient.name,
-                        'phone': recipient.phone,
-                        'avatar': recipient.avatar})
-        repr['recipients'] = res
         return repr
 
     def update(self, instance, validated_data):

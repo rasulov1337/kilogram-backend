@@ -26,6 +26,16 @@ class FileTransferManager(models.Manager):
             return self.get(status='DRF', sender=user_id)
         except self.model.DoesNotExist:
             return None
+        
+    def get_recipients_info(self, transfer_id: int):
+        res = []
+        for transfer_recipient in FileTransferRecipient.objects.filter(file_transfer_id=transfer_id):
+            res.append({'id': transfer_recipient.recipient.id,
+                        'name': transfer_recipient.recipient.name,
+                        'phone': transfer_recipient.recipient.phone,
+                        'avatar': transfer_recipient.recipient.avatar,
+                        'comment': transfer_recipient.comment})
+        return res
 
 
 class FileTransfer(models.Model):
