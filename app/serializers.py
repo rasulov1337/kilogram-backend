@@ -5,13 +5,11 @@ from rest_framework import serializers
 
 
 class RecipientSerializer(serializers.ModelSerializer):
-    status = serializers.CharField(write_only=True)
-    
     class Meta:
         # Модель, которую мы сериализуем
         model = Recipient
         # Поля, которые мы сериализуем
-        fields = ["id", "name", "desc", "phone", "city", "birthdate", "status", "avatar", "uni"]
+        fields = ["id", "name", "desc", "phone", "city", "birthdate", "avatar", "uni"]
 
 
 class UserSerializer(serializers.ModelSerializer):

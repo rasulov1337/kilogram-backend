@@ -12,7 +12,7 @@ class Recipient(models.Model):
     phone = models.CharField(max_length=18, unique=True)
     city = models.CharField(max_length=40)
     birthdate = models.DateField()
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
     avatar = models.URLField(blank=True, null=True)
     uni = models.CharField(max_length=140)
 
@@ -68,8 +68,8 @@ class FileTransfer(models.Model):
 
 
 class FileTransferRecipient(models.Model):
-    file_transfer = models.ForeignKey(FileTransfer, on_delete=models.CASCADE)
-    recipient = models.ForeignKey(Recipient, on_delete=models.CASCADE)
+    file_transfer = models.ForeignKey(FileTransfer, on_delete=models.PROTECT)
+    recipient = models.ForeignKey(Recipient, on_delete=models.PROTECT)
     comment = models.CharField(max_length=200, blank=True, null=True)
     sent_at = models.DateTimeField(null=True)  # Is calculated on send
 

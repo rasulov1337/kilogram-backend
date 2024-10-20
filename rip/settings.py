@@ -80,7 +80,7 @@ APPEND_SLASH = False
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'rip-db',
+        'NAME': 'rip',
         'USER': 'admin',
         'PASSWORD': '1234',
         'HOST': 'localhost',

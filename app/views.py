@@ -304,9 +304,12 @@ class FileTransferDetails(APIView):
         if not request.path.split('/')[-1].isdecimal():
             return Response({'error': 'method not allowed'}, status.HTTP_405_METHOD_NOT_ALLOWED)
         transfer = get_object_or_404(self.model_class, id=transfer_id)
+        if transfer.status != 'DRF':
+            return Response({'error': 'Can not delete transfer that is not draft'})
         if transfer.status == 'DEL':
             return Response({'error': 'Transfer already deleted'}, status.HTTP_400_BAD_REQUEST)
         transfer.status = 'DEL'
+        transfer.completed_at = timezone.now()
         FileTransferRecipient.objects.filter(file_transfer__id=transfer.id).delete()
         transfer.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
