@@ -1,7 +1,7 @@
 from datetime import datetime
+from drf_yasg.utils import swagger_auto_schema
 
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Q
@@ -12,33 +12,41 @@ from django.utils.dateparse import parse_date
 from django.utils.timezone import make_aware
 from minio import Minio
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import (
+    api_view,
+    permission_classes,
+    authentication_classes,
+)
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import viewsets
 
-from app.models import Recipient, FileTransfer, FileTransferRecipient
+from django.contrib.auth import authenticate, login, logout
+from django.http import HttpResponse
+from rest_framework.permissions import AllowAny
+from django.views.decorators.csrf import csrf_exempt
+
+from app.models import Recipient, FileTransfer, FileTransferRecipient, CustomUser
 from app.serializers import (
     RecipientSerializer,
     FileTransferSerializer,
     FileTransferRecipientSerializer,
     UserSerializer,
 )
+
+from django.contrib.auth import authenticate, login, logout
+from django.http import HttpResponse
+from rest_framework.permissions import AllowAny
+from django.views.decorators.csrf import csrf_exempt
 from rip import settings
+from app.permissions import IsAdmin, IsManager
 import uuid
 
+import redis
 
-class UserSingleton:
-    _instance = None
-
-    @classmethod
-    def get_instance(cls):
-        if cls._instance is None:
-            try:
-                cls._instance = User.objects.get(id=1)
-            except ObjectDoesNotExist:
-                cls._instance = None
-        return cls._instance
+# Connect to our Redis instance
+session_storage = redis.StrictRedis(host=settings.REDIS_HOST, port=settings.REDIS_PORT)
 
 
 class MinioClient:
@@ -85,10 +93,11 @@ def delete_file(file_name: str):
 class RecipientList(APIView):
     model_class = Recipient
     serializer_class = RecipientSerializer
+    permission_classes = [AllowAny]
 
     # Get list of all recipients
     def get(self, request):
-        user = UserSingleton.get_instance()
+        user = request.user
 
         if "recipient-name" in request.GET:
             recipient_name = request.GET["recipient-name"]
@@ -108,10 +117,10 @@ class RecipientList(APIView):
             )
         return Response(data)
 
-    # Create a new recipient
+    @swagger_auto_schema(request_body=serializer_class)
     def post(self, request):
         data = request.data
-        data["user"] = UserSingleton.get_instance().id
+        data["user"] = request.user.id
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -128,6 +137,7 @@ class RecipientDetail(APIView):
         serializer = self.serializer_class(recipient)
         return Response(serializer.data)
 
+    @swagger_auto_schema(request_body=serializer_class)
     def put(self, request, recipient_id):
         recipient = get_object_or_404(self.model_class, id=recipient_id)
         serializer = self.serializer_class(recipient, data=request.data, partial=True)
@@ -150,21 +160,22 @@ class RecipientDetail(APIView):
         recipient.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def post(self, request: Request, recipient_id):
-        if request.path.endswith("/image/"):
+    @swagger_auto_schema(request_body=serializer_class)
+    def post(self, request: Request, recipient_id: int, action: str):
+        if action == "/image/":
             return self.image(request, recipient_id)
-        elif request.path.endswith("/draft/"):
+        elif action == "/draft/":
             return self.draft(request, recipient_id)
         raise Http404
 
     def draft(self, request, recipient_id):
-        if not UserSingleton.get_instance().is_authenticated:
+        if not request.user.is_authenticated:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         recipient = get_object_or_404(Recipient, id=recipient_id)
-        draft_transfer = FileTransfer.objects.get_draft(UserSingleton.get_instance().id)
+        draft_transfer = FileTransfer.objects.get_draft(request.user.id)
         if not draft_transfer:
             draft_transfer = FileTransfer.objects.create(
-                status="DRF", sender=UserSingleton.get_instance()
+                status="DRF", sender=request.user
             )
             draft_transfer.save()
 
@@ -212,8 +223,7 @@ class FileTransferList(APIView):
     serializer_class = FileTransferSerializer
 
     def get(self, request):
-        # user = request.user
-        user = UserSingleton.get_instance()
+        user = request.user
         status_filter = formed_at_range = None
 
         if "status" in request.GET:
@@ -255,6 +265,7 @@ class FileTransferDetails(APIView):
         data["recipients"] = self.model_class.objects.get_recipients_info(transfer_id)
         return Response(data)
 
+    @swagger_auto_schema(request_body=serializer_class)
     def put(self, request: Request, transfer_id):
         if request.path.endswith("/form"):
             return self.form(request, transfer_id)
@@ -342,7 +353,7 @@ class FileTransferDetails(APIView):
             )
 
         transfer.completed_at = timezone.now()
-        transfer.moderator = UserSingleton.get_instance()
+        transfer.moderator = request.user
         FileTransferRecipient.objects.filter(file_transfer=transfer).update(
             sent_at=timezone.now()
         )
@@ -381,6 +392,7 @@ class FileTransferRecipientDetails(APIView):
         transfer_recipient.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @swagger_auto_schema(request_body=serializer_class)
     def put(self, request: Request, transfer_id: int, recipient_id: int):
         transfer = get_object_or_404(FileTransfer, id=transfer_id)
         transfer_recipient = get_object_or_404(
@@ -396,48 +408,129 @@ class FileTransferRecipientDetails(APIView):
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
 
-class UserView(APIView):
-    def post(self, request: Request, action: str):
-        if action == "signin":
-            return self.signin(request)
-        elif action == "signup":
-            return self.signup(request)
-        elif action == "signout":
-            return self.signout(request)
-        return Response({"error": "Wrong action"}, status=400)
+# class UserView(APIView):
+#     model_class = CustomUser
+#     serializer_class = UserSerializer
 
-    def put(self, request: Request, action: str):
-        if action == "edit":
-            return self.edit(request)
-        return Response({"error": "Wrong action"}, status=400)
+#     @swagger_auto_schema(request_body=serializer_class)
+#     def post(self, request: Request, action: str):
+#         if action == "signin":
+#             return self.signin(request)
+#         elif action == "signup":
+#             return self.signup(request)
+#         elif action == "signout":
+#             return self.signout(request)
+#         return Response({"error": "Wrong action"}, status=400)
 
-    def signup(self, request: Request):
-        serializer = UserSerializer(data=request.data)
+#     @swagger_auto_schema(request_body=serializer_class)
+#     def put(self, request: Request, action: str):
+#         if action == "edit":
+#             return self.edit(request)
+#         return Response({"error": "Wrong action"}, status=400)
+
+#     def signup(self, request: Request):
+#         serializer = UserSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(
+#                 {"message": "Successful registration"}, status=status.HTTP_201_CREATED
+#             )
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#     def signin(self, request: Request):
+#         pass
+
+#     def signout(self, request: Request):
+#         pass
+
+#     def edit(self, request: Request):
+#         user = request.user
+#         if user is None:
+#             return Response(
+#                 {"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED
+#             )
+
+#         serializer = UserSerializer(user, data=request.data, partial=True)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(
+#                 {"message": "User updated", "user": serializer.data},
+#                 status=status.HTTP_200_OK,
+#             )
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    """Класс, описывающий методы работы с пользователями
+    Осуществляет связь с таблицей пользователей в базе данных
+    """
+
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+    model_class = CustomUser
+
+    def create(self, request):
+        """
+        Функция регистрации новых пользователей
+        Если пользователя c указанным в request email ещё нет, в БД будет добавлен новый пользователь.
+        """
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(
-                {"message": "Successful registration"}, status=status.HTTP_201_CREATED
+            if self.model_class.objects.filter(email=request.data["email"]).exists():
+                return Response({"status": "Exist"}, status=400)
+
+            self.model_class.objects.create_user(
+                email=serializer.data["email"],
+                password=serializer.data["password"],
+                is_superuser=serializer.data["is_superuser"],
+                is_staff=serializer.data["is_staff"],
             )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"status": "Success"}, status=200)
+        return Response(
+            {"status": "Error", "error": serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
-    def signin(self, request: Request):
-        pass
+    def get_permissions(self):
+        if self.action in ["create"]:
+            permission_classes = [AllowAny]
+        elif self.action in ["list"]:
+            permission_classes = [IsAdmin | IsManager]
+        else:
+            permission_classes = [IsAdmin]
+        return [permission() for permission in permission_classes]
 
-    def signout(self, request: Request):
-        pass
 
-    def edit(self, request: Request):
-        user = UserSingleton.get_instance()
-        if user is None:
-            return Response(
-                {"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED
-            )
+def method_permission_classes(classes):
+    def decorator(func):
+        def decorated_func(self, *args, **kwargs):
+            self.permission_classes = classes
+            self.check_permissions(self.request)
+            return func(self, *args, **kwargs)
 
-        serializer = UserSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                {"message": "User updated", "user": serializer.data},
-                status=status.HTTP_200_OK,
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return decorated_func
+
+    return decorator
+
+
+@permission_classes([AllowAny])
+@authentication_classes([])
+def signin(request):
+    username = request.data["email"]
+    password = request.data["password"]
+    user = authenticate(request, email=username, password=password)
+    if user is not None:
+        random_key = str(uuid.uuid4())
+        session_storage.set(random_key, username)
+
+        response = HttpResponse("{'status': 'ok'}")
+        response.set_cookie("session_id", random_key)
+
+        return response
+    else:
+        return HttpResponse("{'status': 'error', 'error': 'login failed'}")
+
+
+def signout(request):
+    logout(request._request)
+    return Response({"status": "Success"})
