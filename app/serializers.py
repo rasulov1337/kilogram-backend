@@ -12,8 +12,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ["username", "password", "is_staff", "is_superuser"]
-        extra_kwargs = {"username": {"required": True}}
+        fields = ["email", "password", "is_staff", "is_superuser"]
+        extra_kwargs = {"email": {"required": True}}
 
 
 class RecipientSerializer(serializers.ModelSerializer):
