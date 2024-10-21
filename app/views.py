@@ -40,7 +40,7 @@ from django.http import HttpResponse
 from rest_framework.permissions import AllowAny
 from django.views.decorators.csrf import csrf_exempt
 from rip import settings
-from app.permissions import IsAdmin, IsManager
+from app.permissions import IsAdmin, IsModerator
 import uuid
 
 import redis
@@ -61,6 +61,18 @@ class MinioClient:
                 secure=settings.MINIO_USE_SSL,
             )
         return cls._instance
+
+
+def method_permission_classes(classes):
+    def decorator(func):
+        def decorated_func(self, *args, **kwargs):
+            self.permission_classes = classes
+            self.check_permissions(self.request)
+            return func(self, *args, **kwargs)
+
+        return decorated_func
+
+    return decorator
 
 
 def load_file(file: InMemoryUploadedFile):
@@ -117,10 +129,10 @@ class RecipientList(APIView):
             )
         return Response(data)
 
+    @method_permission_classes([IsModerator])
     @swagger_auto_schema(request_body=serializer_class)
     def post(self, request):
         data = request.data
-        data["user"] = request.user.id
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -137,6 +149,9 @@ class RecipientDetail(APIView):
         serializer = self.serializer_class(recipient)
         return Response(serializer.data)
 
+    @method_permission_classes(
+        IsModerator,
+    )
     @swagger_auto_schema(request_body=serializer_class)
     def put(self, request, recipient_id):
         recipient = get_object_or_404(self.model_class, id=recipient_id)
@@ -146,6 +161,9 @@ class RecipientDetail(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @method_permission_classes(
+        IsModerator,
+    )
     def delete(self, request, recipient_id):
         recipient = get_object_or_404(self.model_class, id=recipient_id)
         if recipient.status == "D":
@@ -160,6 +178,9 @@ class RecipientDetail(APIView):
         recipient.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @method_permission_classes(
+        IsModerator,
+    )
     @swagger_auto_schema(request_body=serializer_class)
     def post(self, request: Request, recipient_id: int, action: str):
         if action == "/image/":
@@ -265,6 +286,9 @@ class FileTransferDetails(APIView):
         data["recipients"] = self.model_class.objects.get_recipients_info(transfer_id)
         return Response(data)
 
+    @method_permission_classes(
+        IsModerator,
+    )
     @swagger_auto_schema(request_body=serializer_class)
     def put(self, request: Request, transfer_id):
         if request.path.endswith("/form"):
@@ -317,8 +341,10 @@ class FileTransferDetails(APIView):
         transfer.save()
         return Response(status=status.HTTP_200_OK)
 
+    @method_permission_classes(
+        IsModerator,
+    )
     def complete(self, request: Request, transfer_id: int):
-        # TODO: проверка статуса модера
         transfer: FileTransfer = get_object_or_404(self.model_class, id=transfer_id)
         if transfer.status == "REJ" or transfer.status == "COM":
             return Response(
@@ -437,12 +463,6 @@ class FileTransferRecipientDetails(APIView):
 #             )
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#     def signin(self, request: Request):
-#         pass
-
-#     def signout(self, request: Request):
-#         pass
-
 #     def edit(self, request: Request):
 #         user = request.user
 #         if user is None:
@@ -476,7 +496,9 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            if self.model_class.objects.filter(username=request.data["username"]).exists():
+            if self.model_class.objects.filter(
+                username=request.data["username"]
+            ).exists():
                 return Response({"status": "Exist"}, status=400)
 
             self.model_class.objects.create_user(
@@ -513,7 +535,11 @@ def method_permission_classes(classes):
     return decorator
 
 
-@permission_classes([AllowAny])
+@permission_classes(
+    [
+        AllowAny,
+    ]
+)
 @authentication_classes([])
 def signin(request):
     username = request.data["username"]
@@ -531,6 +557,8 @@ def signin(request):
         return HttpResponse("{'status': 'error', 'error': 'login failed'}")
 
 
+@permission_classes([AllowAny])
+@authentication_classes([])
 def signout(request):
     logout(request._request)
     return Response({"status": "Success"})
