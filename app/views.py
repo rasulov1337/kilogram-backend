@@ -149,9 +149,7 @@ class RecipientDetail(APIView):
         serializer = self.serializer_class(recipient)
         return Response(serializer.data)
 
-    @method_permission_classes(
-        IsModerator,
-    )
+    @method_permission_classes([IsModerator])
     @swagger_auto_schema(request_body=serializer_class)
     def put(self, request, recipient_id):
         recipient = get_object_or_404(self.model_class, id=recipient_id)
@@ -161,9 +159,7 @@ class RecipientDetail(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @method_permission_classes(
-        IsModerator,
-    )
+    @method_permission_classes([IsModerator])
     def delete(self, request, recipient_id):
         recipient = get_object_or_404(self.model_class, id=recipient_id)
         if recipient.status == "D":
@@ -178,18 +174,14 @@ class RecipientDetail(APIView):
         recipient.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @method_permission_classes(
-        IsModerator,
-    )
-    @swagger_auto_schema(request_body=serializer_class)
-    def post(self, request: Request, recipient_id: int, action: str):
-        if action == "/image/":
-            return self.image(request, recipient_id)
-        elif action == "/draft/":
-            return self.draft(request, recipient_id)
-        raise Http404
 
-    def draft(self, request, recipient_id):
+class RecipientDetailDraft(APIView):
+    model_class = Recipient
+    serializer_class = RecipientSerializer
+
+    """ Adds recipient to the draft """
+
+    def post(self, request, recipient_id):
         if not request.user.is_authenticated:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         recipient = get_object_or_404(Recipient, id=recipient_id)
@@ -209,7 +201,14 @@ class RecipientDetail(APIView):
         draft_transfer.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def image(self, request, recipient_id):
+
+class RecipientDetailAvatar(APIView):
+    model_class = Recipient
+    serializer_class = RecipientSerializer
+
+    """ Adds avatar to the recipient """
+
+    def post(self, request, recipient_id):
         avatar = request.FILES.get("avatar", None)
 
         if not avatar:
@@ -286,9 +285,7 @@ class FileTransferDetails(APIView):
         data["recipients"] = self.model_class.objects.get_recipients_info(transfer_id)
         return Response(data)
 
-    @method_permission_classes(
-        IsModerator,
-    )
+    @method_permission_classes([IsModerator])
     @swagger_auto_schema(request_body=serializer_class)
     def put(self, request: Request, transfer_id):
         if request.path.endswith("/form"):
@@ -341,9 +338,7 @@ class FileTransferDetails(APIView):
         transfer.save()
         return Response(status=status.HTTP_200_OK)
 
-    @method_permission_classes(
-        IsModerator,
-    )
+    @method_permission_classes([IsModerator])
     def complete(self, request: Request, transfer_id: int):
         transfer: FileTransfer = get_object_or_404(self.model_class, id=transfer_id)
         if transfer.status == "REJ" or transfer.status == "COM":

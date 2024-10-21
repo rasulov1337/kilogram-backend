@@ -26,8 +26,18 @@ router.register(r"user", views.UserViewSet, basename="user")
 urlpatterns = [
     path("recipients/", views.RecipientList.as_view(), name="recipients-list"),
     path(
-        "recipients/<int:recipient_id>/<str:action>",
+        "recipients/<int:recipient_id>/",
         views.RecipientDetail.as_view(),
+        name="recipients-detail",
+    ),
+    path(
+        "recipients/<int:recipient_id>/draft",
+        views.RecipientDetailDraft.as_view(),
+        name="recipients-detail",
+    ),
+    path(
+        "recipients/<int:recipient_id>/avatar",
+        views.RecipientDetailAvatar.as_view(),
         name="recipients-detail",
     ),
     path(
