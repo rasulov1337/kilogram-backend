@@ -40,10 +40,19 @@ from django.http import HttpResponse
 from rest_framework.permissions import AllowAny
 from django.views.decorators.csrf import csrf_exempt
 from rip import settings
-from app.permissions import IsAdmin, IsModerator
+from app.permissions import IsAdmin, IsModerator, IsAnon
 import uuid
 
 import redis
+
+from rest_framework.authentication import SessionAuthentication
+from django.middleware.csrf import get_token
+
+
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request):
+        pass
+
 
 # Connect to our Redis instance
 session_storage = redis.StrictRedis(host=settings.REDIS_HOST, port=settings.REDIS_PORT)
@@ -106,6 +115,7 @@ class RecipientList(APIView):
     model_class = Recipient
     serializer_class = RecipientSerializer
     permission_classes = [AllowAny]
+    authentication_classes = [SessionAuthentication]
 
     # Get list of all recipients
     def get(self, request):
@@ -129,9 +139,14 @@ class RecipientList(APIView):
             )
         return Response(data)
 
+    @swagger_auto_schema(request_body=RecipientSerializer)
     @method_permission_classes([IsModerator])
-    @swagger_auto_schema(request_body=serializer_class)
     def post(self, request):
+        if request.user.is_authenticated:
+            print("TRUE HE IS")
+        else:
+            print("NAH")
+        print(request.user)
         data = request.data
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -530,15 +545,13 @@ def method_permission_classes(classes):
     return decorator
 
 
-@permission_classes(
-    [
-        AllowAny,
-    ]
-)
-@authentication_classes([])
+@swagger_auto_schema(method="post", request_body=UserSerializer)
+@api_view(["POST"])
+@permission_classes([IsAnon])
+@authentication_classes([CsrfExemptSessionAuthentication])
 def signin(request):
-    username = request.data["username"]
-    password = request.data["password"]
+    username = request.data.get("username", None)
+    password = request.data.get("password", None)
     user = authenticate(request, username=username, password=password)
     if user is not None:
         random_key = str(uuid.uuid4())
@@ -546,6 +559,7 @@ def signin(request):
 
         response = HttpResponse("{'status': 'ok'}")
         response.set_cookie("session_id", random_key)
+        response.set_cookie("csrftoken", get_token(request))
 
         return response
     else:
@@ -553,7 +567,6 @@ def signin(request):
 
 
 @permission_classes([AllowAny])
-@authentication_classes([])
 def signout(request):
     logout(request._request)
     return Response({"status": "Success"})

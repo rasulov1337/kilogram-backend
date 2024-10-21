@@ -50,6 +50,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "app.middleware.session_middleware",
 ]
 
 ROOT_URLCONF = "rip.urls"
@@ -125,8 +126,7 @@ STATIC_URL = "static/"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.BasicAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.SessionAuthentication"
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
@@ -140,6 +140,13 @@ AWS_ACCESS_KEY_ID = "minio"
 AWS_SECRET_ACCESS_KEY = "minio124"
 AWS_S3_ENDPOINT_URL = "127.0.0.1:9000"
 MINIO_USE_SSL = False
+
+
+APPEND_SLASH = False
+
+
+CSRF_TRUSTED_ORIGINS = ("http://localhost:8000",)
+
 
 AUTH_USER_MODEL = "app.CustomUser"
 
