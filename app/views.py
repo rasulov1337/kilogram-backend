@@ -472,15 +472,15 @@ class UserViewSet(viewsets.ModelViewSet):
     def create(self, request):
         """
         Функция регистрации новых пользователей
-        Если пользователя c указанным в request email ещё нет, в БД будет добавлен новый пользователь.
+        Если пользователя c указанным в request username ещё нет, в БД будет добавлен новый пользователь.
         """
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            if self.model_class.objects.filter(email=request.data["email"]).exists():
+            if self.model_class.objects.filter(username=request.data["username"]).exists():
                 return Response({"status": "Exist"}, status=400)
 
             self.model_class.objects.create_user(
-                email=serializer.data["email"],
+                username=serializer.data["username"],
                 password=serializer.data["password"],
                 is_superuser=serializer.data["is_superuser"],
                 is_staff=serializer.data["is_staff"],
@@ -516,9 +516,9 @@ def method_permission_classes(classes):
 @permission_classes([AllowAny])
 @authentication_classes([])
 def signin(request):
-    username = request.data["email"]
+    username = request.data["username"]
     password = request.data["password"]
-    user = authenticate(request, email=username, password=password)
+    user = authenticate(request, username=username, password=password)
     if user is not None:
         random_key = str(uuid.uuid4())
         session_storage.set(random_key, username)

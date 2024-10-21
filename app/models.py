@@ -8,33 +8,9 @@ from django.contrib.auth.models import (
 )
 
 
-class NewUserManager(UserManager):
-    def create_user(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError("User must have an email address")
-
-        email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
-        user.set_password(password)
-        user.save(using=self.db)
-        return user
-
-    def create_superuser(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError("User must have an email address")
-
-        email = self.normalize_email(email)
-        # user.is_staff = True
-        # user.is_superuser = True
-        user = self.model(email=email, **extra_fields)
-        user.set_password(password)
-        user.save(using=self.db)
-        return user
-
-
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(("email address"), unique=True, max_length=50)
-    password = models.CharField(verbose_name="Пароль")
+    username = models.CharField(verbose_name=("Username"), unique=True, max_length=50)
+    password = models.CharField(verbose_name="Password")
     is_staff = models.BooleanField(
         default=False, verbose_name="Является ли пользователь менеджером?"
     )
@@ -42,9 +18,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         default=False, verbose_name="Является ли пользователь админом?"
     )
 
-    USERNAME_FIELD = "email"
-
-    objects = NewUserManager()
+    USERNAME_FIELD = "username"
 
 
 class Recipient(models.Model):
