@@ -5,12 +5,13 @@ import redis
 from django.contrib.auth import authenticate
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Q
-from django.http import Http404, HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.timezone import make_aware
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
 from minio import Minio
 from rest_framework import status, viewsets
 from rest_framework.authentication import SessionAuthentication
@@ -93,6 +94,16 @@ class RecipientList(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     # Get list of all recipients
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'recipient-name',
+                openapi.IN_QUERY,
+                description='Used for filtration by recipient\'s name',
+                type=openapi.TYPE_STRING
+            )
+        ]
+    )
     def get(self, request):
         user = request.user
 
@@ -135,8 +146,8 @@ class RecipientDetail(APIView):
         serializer = self.serializer_class(recipient)
         return Response(serializer.data)
 
-    @method_permission_classes([IsModerator])
     @swagger_auto_schema(request_body=serializer_class)
+    @method_permission_classes([IsModerator])
     def put(self, request, recipient_id):
         recipient = get_object_or_404(self.model_class, id=recipient_id)
         serializer = self.serializer_class(
@@ -171,7 +182,8 @@ class RecipientDetailDraft(APIView):
 
     """ Adds recipient to the draft """
 
-    @swagger_auto_schema(request_body=serializer_class)
+    @swagger_auto_schema(
+        operation_description='Adds recipient to the user\'s draft file transfer')
     def post(self, request, recipient_id):
         recipient = get_object_or_404(Recipient, id=recipient_id)
         draft_transfer = FileTransfer.objects.get_draft(request.user.id)
@@ -198,6 +210,12 @@ class RecipientDetailAvatar(APIView):
 
     """ Adds avatar to the recipient """
 
+    @swagger_auto_schema(operation_description='Adds avatar to the recipient',
+                         request_body=openapi.Schema(
+                             type=openapi.TYPE_FILE,
+                             format=openapi.FORMAT_BINARY,
+                             description='New avatar',
+                         ))
     def post(self, request, recipient_id):
         avatar = request.FILES.get("avatar", None)
 
@@ -233,6 +251,22 @@ class FileTransferList(APIView):
     serializer_class = FileTransferSerializer
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'status',
+                openapi.IN_QUERY,
+                description='Filter by status',
+                type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                'formed-at-range',
+                openapi.IN_QUERY,
+                description='Filter by range which the transfer was formed at (Type as: %Y-%m-%d,%Y-%m-%d)',
+                type=openapi.TYPE_STRING
+            )
+        ]
+    )
     def get(self, request):
         if request.user.is_staff or request.user.is_superuser:
             return self.get_all_transfers(request)
@@ -297,8 +331,8 @@ class FileTransferDetails(APIView):
             transfer_id)
         return Response(data)
 
-    @method_permission_classes([IsAuthenticated])
     @swagger_auto_schema(request_body=serializer_class)
+    @method_permission_classes([IsAuthenticated])
     def put(self, request: Request, transfer_id):
         if not (
             request.user.is_staff
@@ -309,15 +343,7 @@ class FileTransferDetails(APIView):
                 {"error": "You do not have permission to perform this action"},
                 status.HTTP_403_FORBIDDEN,
             )
-        if request.path.endswith("/form"):
-            return self.form(request, transfer_id)
-        elif request.path.endswith("/complete"):
-            return self.complete(request, transfer_id)
-        elif request.path.split("/")[-1].isdecimal():
-            return self.edit(request, transfer_id)
-        raise Http404
 
-    def edit(self, request: Request, transfer_id: int):
         # First check all new info except for the file
         transfer: FileTransfer = get_object_or_404(
             self.model_class, id=transfer_id)
@@ -346,7 +372,34 @@ class FileTransferDetails(APIView):
 
         return Response(serializer.data)
 
-    def form(self, request: Request, transfer_id: int):
+    def delete(self, request, transfer_id):
+        transfer = get_object_or_404(self.model_class, id=transfer_id)
+
+        if not request.sender.is_staff and transfer.sender != request.user:
+            return Response({
+                'error': 'You do not have permissions to delete this transfer'
+            }, status.HTTP_403_FORBIDDEN)
+
+        if transfer.status != "DRF":
+            return Response(
+                {"error": "Can not delete transfer that is not draft"})
+        if transfer.status == "DEL":
+            return Response(
+                {"error": "Transfer already deleted"},
+                status.HTTP_400_BAD_REQUEST)
+        transfer.status = "DEL"
+        transfer.completed_at = timezone.now()
+        FileTransferRecipient.objects.filter(
+            file_transfer__id=transfer.id).delete()
+        transfer.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FileTransferDetailsForm(APIView):
+    model_class = FileTransfer
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request: Request, transfer_id: int):
         transfer: FileTransfer = get_object_or_404(
             self.model_class, id=transfer_id)
         if not request.sender.is_staff and transfer.sender != request.user:
@@ -376,8 +429,26 @@ class FileTransferDetails(APIView):
         transfer.save()
         return Response(status=status.HTTP_200_OK)
 
-    @method_permission_classes([IsModerator])
-    def complete(self, request: Request, transfer_id: int):
+
+class FileTransferDetailsComplete(APIView):
+    model_class = FileTransfer
+    permission_classes = [IsModerator]
+
+    @swagger_auto_schema(
+        operation_description='Completes the transfer',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'action': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='Action: (reject|complete) the transfer',
+                    default='complete'
+                )
+            },
+            required=['action']
+        )
+    )
+    def put(self, request: Request, transfer_id: int):
         transfer: FileTransfer = get_object_or_404(
             self.model_class, id=transfer_id)
         if transfer.status == "REJ" or transfer.status == "COM":
@@ -422,40 +493,14 @@ class FileTransferDetails(APIView):
         transfer.save()
         return Response(status=status.HTTP_200_OK)
 
-    def delete(self, request, transfer_id):
-        transfer = get_object_or_404(self.model_class, id=transfer_id)
-
-        if not request.sender.is_staff and transfer.sender != request.user:
-            return Response({
-                'error': 'You do not have permissions to delete this transfer'
-            }, status.HTTP_403_FORBIDDEN)
-
-        if transfer.status != "DRF":
-            return Response(
-                {"error": "Can not delete transfer that is not draft"})
-        if transfer.status == "DEL":
-            return Response(
-                {"error": "Transfer already deleted"},
-                status.HTTP_400_BAD_REQUEST)
-        transfer.status = "DEL"
-        transfer.completed_at = timezone.now()
-        FileTransferRecipient.objects.filter(
-            file_transfer__id=transfer.id).delete()
-        transfer.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
 
 class FileTransferRecipientDetails(APIView):
     model_class = FileTransferRecipient
     serializer_class = FileTransferRecipientSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsModerator]
 
     def delete(self, request: Request, transfer_id: int, recipient_id: int):
         transfer = get_object_or_404(FileTransfer, id=transfer_id)
-        if not request.sender.is_staff and transfer.sender != request.user:
-            return Response({
-                'error': 'You do not have permissions to delete this transfer'
-            }, status.HTTP_403_FORBIDDEN)
 
         transfer_recipient = get_object_or_404(
             self.model_class, file_transfer=transfer,
@@ -467,10 +512,6 @@ class FileTransferRecipientDetails(APIView):
     @swagger_auto_schema(request_body=serializer_class)
     def put(self, request: Request, transfer_id: int, recipient_id: int):
         transfer = get_object_or_404(FileTransfer, id=transfer_id)
-        if not request.sender.is_staff and transfer.sender != request.user:
-            return Response({
-                'error': 'You do not have permissions to delete this transfer'
-            }, status.HTTP_403_FORBIDDEN)
 
         transfer_recipient = get_object_or_404(
             self.model_class, file_transfer=transfer,
@@ -537,14 +578,17 @@ class UserViewSet(viewsets.ModelViewSet):
         permission_classes = [AllowAny]
         if self.action == 'update':
             permission_classes = [IsAuthenticated]
-        if self.action in ["create", "list"]:
+        if self.action in ["list"]:
             permission_classes = [IsModerator]
+        if self.action in ["create"]:
+            permission_classes = [AllowAny]
         else:
             permission_classes = [IsAdmin]
         return [permission() for permission in permission_classes]
 
 
-@swagger_auto_schema(method="post", request_body=UserSerializer)
+@swagger_auto_schema(method="post", request_body=UserSerializer,
+                     operation_description='Signs the user in')
 @api_view(["POST"])
 @permission_classes([IsAnon])
 @authentication_classes([CsrfExemptSessionAuthentication])
@@ -556,23 +600,24 @@ def signin(request):
         random_key = str(uuid.uuid4())
         session_storage.set(random_key, username)
 
-        response = HttpResponse("{'status': 'ok'}")
+        response = Response("{'status': 'ok'}")
         response.set_cookie("session_id", random_key)
         response.set_cookie("csrftoken", get_token(request))
 
         return response
     else:
-        return HttpResponse("{'status': 'error', 'error': 'login failed'}")
+        return Response("{'status': 'error', 'error': 'login failed'}")
 
 
 @permission_classes([IsAuthenticated])
-@swagger_auto_schema(method='post')
+@swagger_auto_schema(method='post', operation_description='Signs the user out')
+@api_view(['POST'])
 def signout(request):
     session_id = request.COOKIES.get("session_id")
     if session_id:
         session_storage.delete(session_id)
-        response = HttpResponse("{'status': 'ok'}")
+        response = Response("{'status': 'ok'}")
         response.delete_cookie("session_id")
         return response
     else:
-        return HttpResponse("{'status': 'error', 'error': 'no session found'}")
+        return Response("{'status': 'error', 'error': 'no session found'}")

@@ -47,12 +47,12 @@ urlpatterns = [
     ),
     path(
         "transfers/<int:transfer_id>/form",
-        views.FileTransferDetails.as_view(),
+        views.FileTransferDetailsForm.as_view(),
         name="transfer-form",
     ),
     path(
         "transfers/<int:transfer_id>/complete",
-        views.FileTransferDetails.as_view(),
+        views.FileTransferDetailsComplete.as_view(),
         name="transfer-complete",
     ),
     path(
@@ -66,7 +66,6 @@ urlpatterns = [
         schema_view.with_ui("swagger", cache_timeout=0),
         name="schema-swagger-ui",
     ),
-    # path("user", include(router.urls)),
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
     path("signin", views.signin, name="signin"),
     path("signout", views.signout, name="signout"),

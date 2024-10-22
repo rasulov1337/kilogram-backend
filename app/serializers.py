@@ -19,7 +19,8 @@ class RecipientSerializer(serializers.ModelSerializer):
         # Модель, которую мы сериализуем
         model = Recipient
         # Поля, которые мы сериализуем
-        fields = ["id", "name", "desc", "phone", "city", "birthdate", "avatar", "uni"]
+        fields = ["id", "name", "desc", "phone",
+                  "city", "birthdate", "avatar", "uni"]
 
     def get_fields(self):
         new_fields = OrderedDict()
@@ -47,7 +48,8 @@ class FileTransferSerializer(serializers.ModelSerializer):
         repr = super().to_representation(instance)
         repr["sender"] = CustomUser.objects.get(id=repr["sender"]).username
         if repr["moderator"]:
-            repr["moderator"] = CustomUser.objects.get(id=repr["moderator"]).username
+            repr["moderator"] = CustomUser.objects.get(
+                id=repr["moderator"]).username
 
         return repr
 
