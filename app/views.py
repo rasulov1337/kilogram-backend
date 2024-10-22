@@ -17,7 +17,7 @@ from rest_framework import status, viewsets
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import (api_view, authentication_classes,
                                        permission_classes)
-from rest_framework.permissions import (AllowAny, IsAuthenticated,
+from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -575,13 +575,13 @@ class UserViewSet(viewsets.ModelViewSet):
         )
 
     def get_permissions(self):
-        permission_classes = [AllowAny]
+        permission_classes = []
         if self.action == 'update':
             permission_classes = [IsAuthenticated]
         if self.action in ["list"]:
             permission_classes = [IsModerator]
         if self.action in ["create"]:
-            permission_classes = [AllowAny]
+            permission_classes = [IsAnon]
         else:
             permission_classes = [IsAdmin]
         return [permission() for permission in permission_classes]
