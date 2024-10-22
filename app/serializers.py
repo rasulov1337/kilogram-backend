@@ -1,5 +1,3 @@
-from django.contrib.auth.models import User
-
 from app.models import Recipient, FileTransfer, FileTransferRecipient
 from rest_framework import serializers
 from collections import OrderedDict
@@ -47,9 +45,9 @@ class FileTransferSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         repr = super().to_representation(instance)
-        repr["sender"] = User.objects.get(id=repr["sender"]).username
+        repr["sender"] = CustomUser.objects.get(id=repr["sender"]).username
         if repr["moderator"]:
-            repr["moderator"] = User.objects.get(id=repr["moderator"]).username
+            repr["moderator"] = CustomUser.objects.get(id=repr["moderator"]).username
 
         return repr
 

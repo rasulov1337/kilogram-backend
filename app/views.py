@@ -2,13 +2,11 @@ from datetime import datetime
 from drf_yasg.utils import swagger_auto_schema
 
 from django.contrib.auth import authenticate
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.utils.dateparse import parse_date
 from django.utils.timezone import make_aware
 from minio import Minio
 from rest_framework import status
@@ -25,7 +23,6 @@ from rest_framework import viewsets
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse
 from rest_framework.permissions import AllowAny
-from django.views.decorators.csrf import csrf_exempt
 
 from app.models import Recipient, FileTransfer, FileTransferRecipient, CustomUser
 from app.serializers import (
@@ -35,10 +32,9 @@ from app.serializers import (
     UserSerializer,
 )
 
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, logout
 from django.http import HttpResponse
 from rest_framework.permissions import AllowAny
-from django.views.decorators.csrf import csrf_exempt
 from rip import settings
 from app.permissions import IsAdmin, IsModerator, IsAnon
 import uuid
@@ -47,6 +43,7 @@ import redis
 
 from rest_framework.authentication import SessionAuthentication
 from django.middleware.csrf import get_token
+from rest_framework.permissions import IsAuthenticated
 
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
@@ -142,12 +139,6 @@ class RecipientList(APIView):
     @swagger_auto_schema(request_body=RecipientSerializer)
     @method_permission_classes([IsModerator])
     def post(self, request):
-        if request.user.is_authenticated:
-            print("TRUE HE IS")
-        else:
-            print("NAH")
-        print(request.user)
-        data = request.data
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -257,8 +248,32 @@ class FileTransferList(APIView):
     model_class = FileTransfer
     serializer_class = FileTransferSerializer
 
+    @method_permission_classes([IsAuthenticated])
     def get(self, request):
-        user = request.user
+        if request.user.is_staff or request.user.is_superuser:
+            return self.get_all_transfers(request)
+        return self.get_transfers_of_sender(request)
+
+    def get_transfers_of_sender(self, request: Request):
+        transfers = self.model_class.objects.filter(
+            ~(Q(status="DRF") | Q(status="DEL")), sender=request.user
+        )
+
+        transfers = self.filter_transfers(request, transfers)
+        serializer = self.serializer_class(transfers, many=True)
+        return Response(serializer.data)
+
+    @method_permission_classes([IsModerator])
+    def get_all_transfers(self, request: Request):
+        transfers = self.model_class.objects.filter(
+            ~(Q(status="DRF") | Q(status="DEL"))
+        )
+        transfers = self.filter_transfers(request, transfers)
+
+        serializer = self.serializer_class(transfers, many=True)
+        return Response(serializer.data)
+
+    def filter_transfers(self, request: Request, transfers: [FileTransfer]):
         status_filter = formed_at_range = None
 
         if "status" in request.GET:
@@ -272,15 +287,11 @@ class FileTransferList(APIView):
             )
             formed_at_range[0] = make_aware(formed_at_range[0])
             formed_at_range[1] = make_aware(formed_at_range[1])
-        transfers = self.model_class.objects.filter(
-            ~(Q(status="DRF") | Q(status="DEL")), sender=user
-        )
         if status_filter:
             transfers = transfers.filter(status=status_filter)
         if formed_at_range:
             transfers = transfers.filter(formed_at__range=formed_at_range)
-        serializer = self.serializer_class(transfers, many=True)
-        return Response(serializer.data)
+        return transfers
 
 
 class FileTransferDetails(APIView):
@@ -300,7 +311,7 @@ class FileTransferDetails(APIView):
         data["recipients"] = self.model_class.objects.get_recipients_info(transfer_id)
         return Response(data)
 
-    @method_permission_classes([IsModerator])
+    @method_permission_classes([IsAuthenticated])
     @swagger_auto_schema(request_body=serializer_class)
     def put(self, request: Request, transfer_id):
         if request.path.endswith("/form"):
@@ -527,7 +538,7 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action in ["create"]:
             permission_classes = [AllowAny]
         elif self.action in ["list"]:
-            permission_classes = [IsAdmin | IsManager]
+            permission_classes = [IsAdmin | IsModerator]
         else:
             permission_classes = [IsAdmin]
         return [permission() for permission in permission_classes]
