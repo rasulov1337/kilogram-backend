@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -6,7 +5,6 @@ from django.contrib.auth.models import (
     PermissionsMixin,
     BaseUserManager,
 )
-from django.contrib.auth.models import UserManager
 
 
 class NewUserManager(UserManager):
@@ -30,7 +28,9 @@ class NewUserManager(UserManager):
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(verbose_name=("Username"), unique=True, max_length=50)
+    username = models.CharField(
+        verbose_name=("Username"),
+        unique=True, max_length=50)
     password = models.CharField(verbose_name="Password")
     is_staff = models.BooleanField(
         default=False, verbose_name="Является ли пользователь менеджером?"
@@ -51,7 +51,8 @@ class Recipient(models.Model):
     phone = models.CharField(max_length=18, unique=True)
     city = models.CharField(max_length=40)
     birthdate = models.DateField()
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default="A")
+    status = models.CharField(
+        max_length=1, choices=STATUS_CHOICES, default="A")
     avatar = models.URLField(blank=True, null=True)
     uni = models.CharField(max_length=140)
 
@@ -99,9 +100,10 @@ class FileTransfer(models.Model):
         CustomUser, on_delete=models.PROTECT, related_name="sender"
     )
     moderator = models.ForeignKey(
-        CustomUser, on_delete=models.SET_NULL, null=True, related_name="moderator"
-    )
-    recipients = models.ManyToManyField(Recipient, through="FileTransferRecipient")
+        CustomUser, on_delete=models.SET_NULL, null=True,
+        related_name="moderator")
+    recipients = models.ManyToManyField(
+        Recipient, through="FileTransferRecipient")
     file = models.URLField(blank=True, null=True)
 
     objects = FileTransferManager()
@@ -134,6 +136,5 @@ class FileTransferRecipient(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["file_transfer", "recipient"], name="unique_transfer_recipient"
-            )
-        ]
+                fields=["file_transfer", "recipient"],
+                name="unique_transfer_recipient")]
