@@ -1,4 +1,4 @@
-from django.urls import path, re_path, include
+from django.urls import path, include
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions, routers
@@ -21,7 +21,7 @@ schema_view = get_schema_view(
 
 router = routers.DefaultRouter()
 
-router.register(r"user", views.UserViewSet, basename="user")
+router.register("user", views.UserViewSet, basename="user")
 
 urlpatterns = [
     path("recipients/", views.RecipientList.as_view(), name="recipients-list"),
