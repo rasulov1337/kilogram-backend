@@ -1,47 +1,34 @@
+import uuid
 from datetime import datetime
-from drf_yasg.utils import swagger_auto_schema
 
+import redis
+from django.contrib.auth import authenticate
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Q
-from django.http import Http404
+from django.http import Http404, HttpResponse
+from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.timezone import make_aware
+from drf_yasg.utils import swagger_auto_schema
 from minio import Minio
-from rest_framework import status
-from rest_framework.decorators import (
-    api_view,
-    permission_classes,
-    authentication_classes,
-)
+from rest_framework import status, viewsets
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import (api_view, authentication_classes,
+                                       permission_classes)
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import viewsets
 
-from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse
-from rest_framework.permissions import AllowAny
-
-from app.models import (Recipient, FileTransfer,
-                        FileTransferRecipient, CustomUser)
-from app.serializers import (
-    RecipientSerializer,
-    FileTransferSerializer,
-    FileTransferRecipientSerializer,
-    UserSerializer,
-)
-
+from app.models import (CustomUser, FileTransfer, FileTransferRecipient,
+                        Recipient)
+from app.permissions import IsAdmin, IsAnon, IsModerator
+from app.serializers import (FileTransferRecipientSerializer,
+                             FileTransferSerializer, RecipientSerializer,
+                             UserSerializer)
 from rip import settings
-from app.permissions import IsAdmin, IsModerator, IsAnon
-import uuid
-
-import redis
-
-from rest_framework.authentication import SessionAuthentication
-from django.middleware.csrf import get_token
-from rest_framework.permissions import (
-    IsAuthenticated, IsAuthenticatedOrReadOnly)
 
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
