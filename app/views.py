@@ -485,56 +485,6 @@ class FileTransferRecipientDetails(APIView):
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
 
-# class UserView(APIView):
-#     model_class = CustomUser
-#     serializer_class = UserSerializer
-
-#     @swagger_auto_schema(request_body=serializer_class)
-#     def post(self, request: Request, action: str):
-#         if action == "signin":
-#             return self.signin(request)
-#         elif action == "signup":
-#             return self.signup(request)
-#         elif action == "signout":
-#             return self.signout(request)
-#         return Response({"error": "Wrong action"}, status=400)
-
-#     @swagger_auto_schema(request_body=serializer_class)
-#     def put(self, request: Request, action: str):
-#         if action == "edit":
-#             return self.edit(request)
-#         return Response({"error": "Wrong action"}, status=400)
-
-#     def signup(self, request: Request):
-#         serializer = UserSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(
-#                 {"message": "Successful registration"},
-# status=status.HTTP_201_CREATED
-#             )
-#         return Response(serializer.errors,
-# status=status.HTTP_400_BAD_REQUEST)
-
-#     def edit(self, request: Request):
-#         user = request.user
-#         if user is None:
-#             return Response(
-#                 {"error": "Unauthorized"},
-# status=status.HTTP_401_UNAUTHORIZED
-#             )
-
-#         serializer = UserSerializer(user, data=request.data, partial=True)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(
-#                 {"message": "User updated", "user": serializer.data},
-#                 status=status.HTTP_200_OK,
-#             )
-#         return Response(serializer.errors,
-# status=status.HTTP_400_BAD_REQUEST)
-
-
 class UserViewSet(viewsets.ModelViewSet):
     """Класс, описывающий методы работы с пользователями
     Осуществляет связь с таблицей пользователей в базе данных
