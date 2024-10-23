@@ -321,7 +321,11 @@ class FileTransferDetails(APIView):
 
     def get(self, request: Request, transfer_id):
         transfer = get_object_or_404(self.model_class, id=transfer_id)
-        if not request.user.is_staff and request.user != transfer.sender:
+        if (
+            not request.user.is_staff
+            and not request.user.is_superuser
+            and request.user != transfer.sender
+        ):
             return Response(
                 {"error": "You do not have permission to view this transfer"},
                 status.HTTP_403_FORBIDDEN,
@@ -349,7 +353,11 @@ class FileTransferDetails(APIView):
         # First check all new info except for the file
         transfer: FileTransfer = get_object_or_404(self.model_class, id=transfer_id)
 
-        if not request.user.is_staff and transfer.sender != request.user:
+        if (
+            not request.user.is_staff
+            and not request.user.is_superuser
+            and transfer.sender != request.user
+        ):
             return Response(
                 {"error": "You do not have permissions to edit this transfer"},
                 status.HTTP_403_FORBIDDEN,
@@ -375,7 +383,11 @@ class FileTransferDetails(APIView):
     def delete(self, request, transfer_id):
         transfer = get_object_or_404(self.model_class, id=transfer_id)
 
-        if not request.user.is_staff and transfer.sender != request.user:
+        if (
+            not request.user.is_staff
+            and not request.user.is_superuser
+            and transfer.sender != request.user
+        ):
             return Response(
                 {"error": "You do not have permissions to delete this transfer"},
                 status.HTTP_403_FORBIDDEN,
@@ -548,7 +560,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
             self.model_class.objects.create_user(
                 username=serializer.data["username"],
-                password=serializer.data["password"]
+                password=serializer.data["password"],
             )
             return Response({"status": "Success"}, status=200)
         return Response(
