@@ -548,9 +548,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
             self.model_class.objects.create_user(
                 username=serializer.data["username"],
-                password=serializer.data["password"],
-                is_superuser=serializer.data["is_superuser"],
-                is_staff=serializer.data["is_staff"],
+                password=serializer.data["password"]
             )
             return Response({"status": "Success"}, status=200)
         return Response(
