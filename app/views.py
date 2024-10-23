@@ -153,9 +153,9 @@ class RecipientDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def post(self, request: Request, recipient_id):
-        if request.path.endswith("/image/"):
+        if request.path.endswith("/image"):
             return self.image(request, recipient_id)
-        elif request.path.endswith("/draft/"):
+        elif request.path.endswith("/draft"):
             return self.draft(request, recipient_id)
         raise Http404
 
