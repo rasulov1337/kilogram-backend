@@ -349,7 +349,7 @@ class FileTransferDetails(APIView):
         # First check all new info except for the file
         transfer: FileTransfer = get_object_or_404(self.model_class, id=transfer_id)
 
-        if not request.sender.is_staff and transfer.sender != request.user:
+        if not request.user.is_staff and transfer.sender != request.user:
             return Response(
                 {"error": "You do not have permissions to edit this transfer"},
                 status.HTTP_403_FORBIDDEN,
@@ -375,7 +375,7 @@ class FileTransferDetails(APIView):
     def delete(self, request, transfer_id):
         transfer = get_object_or_404(self.model_class, id=transfer_id)
 
-        if not request.sender.is_staff and transfer.sender != request.user:
+        if not request.user.is_staff and transfer.sender != request.user:
             return Response(
                 {"error": "You do not have permissions to delete this transfer"},
                 status.HTTP_403_FORBIDDEN,
@@ -400,7 +400,10 @@ class FileTransferDetailsForm(APIView):
 
     def put(self, request: Request, transfer_id: int):
         transfer: FileTransfer = get_object_or_404(self.model_class, id=transfer_id)
-        if not request.sender.is_staff and transfer.sender != request.user:
+        if (
+            not (request.user.is_staff or request.user.is_superuser)
+            and transfer.sender != request.user
+        ):
             return Response(
                 {"error": "You do not have permissions to form this transfer"},
                 status.HTTP_403_FORBIDDEN,
@@ -570,7 +573,7 @@ class UserViewSet(viewsets.ModelViewSet):
         )
 
     def get_permissions(self):
-        permission_classes = []
+        permission_classes = [IsAuthenticated]
         if self.action == "update":
             permission_classes = [IsAuthenticated]
         if self.action in ["list"]:
@@ -598,13 +601,13 @@ def signin(request):
         random_key = str(uuid.uuid4())
         session_storage.set(random_key, username)
 
-        response = Response("{'status': 'ok'}")
+        response = Response({"status": "ok"})
         response.set_cookie("session_id", random_key)
         response.set_cookie("csrftoken", get_token(request))
 
         return response
     else:
-        return Response("{'status': 'error', 'error': 'login failed'}")
+        return Response({"status": "error", "error": "login failed"})
 
 
 @permission_classes([IsAuthenticated])
@@ -614,8 +617,8 @@ def signout(request):
     session_id = request.COOKIES.get("session_id")
     if session_id:
         session_storage.delete(session_id)
-        response = Response("{'status': 'ok'}")
+        response = Response({"status": "ok"})
         response.delete_cookie("session_id")
         return response
     else:
-        return Response("{'status': 'error', 'error': 'no session found'}")
+        return Response({"status": "error", "error": "no session found"})
