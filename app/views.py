@@ -101,11 +101,13 @@ class RecipientList(APIView):
         serializer = self.serializer_class(recipients, many=True)
         data = serializer.data
 
+        draftInfo = {"draftId": None, "draftRecipientsLen": 0}
+
         draft = FileTransfer.objects.get_draft(user.id)
         if draft:
-            data.append(
-                {"draftId": draft.id, "draftRecipientsLen": len(draft.recipients.all())}
-            )
+            draftInfo["draftId"] = draft.id
+            draftInfo["draftRecipientsLen"] = len(draft.recipients.all())
+        data.append(draftInfo)
         return Response(data)
 
     # Create a new recipient
