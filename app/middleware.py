@@ -8,9 +8,9 @@ def session_middleware(get_response):
         # Code to be executed for each request before
         # the view (and later middleware) are called.
 
-        ssid = request.COOKIES.get("session_id")
-        if ssid and session_storage.exists(ssid):
-            username = session_storage.get(ssid).decode("utf-8")
+        session_id = request.META.get("HTTP_SESSION_ID")
+        if session_id and session_storage.exists(session_id):
+            username = session_storage.get(session_id).decode("utf-8")
             request.user = CustomUser.objects.get(username=username)
         else:
             request.user = (
