@@ -510,10 +510,8 @@ class FileTransferRecipientDetails(APIView):
     permission_classes = [IsModerator]
 
     def delete(self, request: Request, transfer_id: int, recipient_id: int):
-        transfer = get_object_or_404(FileTransfer, id=transfer_id)
-
         transfer_recipient = get_object_or_404(
-            self.model_class, file_transfer=transfer, recipient__id=recipient_id
+            self.model_class, file_transfer__id=transfer_id, recipient__id=recipient_id
         )
 
         transfer_recipient.delete()
@@ -521,10 +519,8 @@ class FileTransferRecipientDetails(APIView):
 
     @swagger_auto_schema(request_body=serializer_class)
     def put(self, request: Request, transfer_id: int, recipient_id: int):
-        transfer = get_object_or_404(FileTransfer, id=transfer_id)
-
         transfer_recipient = get_object_or_404(
-            self.model_class, file_transfer=transfer, recipient__id=recipient_id
+            self.model_class, file_transfer__id=transfer_id, recipient__id=recipient_id
         )
 
         serializer = self.serializer_class(
