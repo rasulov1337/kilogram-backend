@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+import random
 
 import redis
 from django.contrib.auth import authenticate
@@ -497,7 +498,7 @@ class FileTransferDetailsComplete(APIView):
         transfer.completed_at = timezone.now()
         transfer.moderator = request.user
         FileTransferRecipient.objects.filter(file_transfer=transfer).update(
-            sent_at=timezone.now()
+            has_read=bool(random.getrandbits(1))
         )
         transfer.save()
         return Response(status=status.HTTP_200_OK)
