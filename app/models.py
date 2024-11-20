@@ -126,7 +126,7 @@ class FileTransferRecipient(models.Model):
     file_transfer = models.ForeignKey(FileTransfer, on_delete=models.PROTECT)
     recipient = models.ForeignKey(Recipient, on_delete=models.PROTECT)
     comment = models.CharField(max_length=200, blank=True, null=True)
-    has_read = models.BooleanField()  # Is calculated on send
+    has_read = models.BooleanField(default=False)  # Is calculated on send
 
     class Meta:
         constraints = [

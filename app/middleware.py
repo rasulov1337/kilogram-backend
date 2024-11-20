@@ -9,9 +9,11 @@ def session_middleware(get_response):
         # the view (and later middleware) are called.
 
         session_id = request.META.get("HTTP_SESSION_ID")
+        if session_id is None:
+            session_id = request.COOKIES.get("session_id")
         if session_id and session_storage.exists(session_id):
-            username = session_storage.get(session_id).decode("utf-8")
-            request.user = CustomUser.objects.get(username=username)
+            user_id = session_storage.get(session_id).decode("utf-8")
+            request.user = CustomUser.objects.get(id=user_id)
         else:
             request.user = (
                 None  # Устанавливаем пользователя в None, если сессия недействительна

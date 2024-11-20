@@ -606,7 +606,7 @@ def signin(request):
     user = authenticate(request, username=username, password=password)
     if user is not None:
         random_key = str(uuid.uuid4())
-        session_storage.set(random_key, username)
+        session_storage.set(random_key, user.id)
 
         response = Response({"status": "ok"})
         response.set_cookie("session_id", random_key)
