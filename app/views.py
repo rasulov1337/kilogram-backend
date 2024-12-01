@@ -614,7 +614,10 @@ def signin(request):
 
         return response
     else:
-        return Response({"status": "error", "error": "login failed"})
+        return Response(
+            {"status": "error", "error": "login failed"},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
 
 
 @permission_classes([IsAuthenticated])
@@ -628,4 +631,7 @@ def signout(request):
         response.delete_cookie("session_id")
         return response
     else:
-        return Response({"status": "error", "error": "no session found"})
+        return Response(
+            {"status": "error", "error": "no session found"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
