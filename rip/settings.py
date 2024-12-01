@@ -154,6 +154,11 @@ AUTH_USER_MODEL = "app.CustomUser"
 #     'http://localhost'
 # ]
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+SESSION_COOKIE_SAMESITE = "Strict"
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 REDIS_HOST = "localhost"
 REDIS_PORT = 6379
