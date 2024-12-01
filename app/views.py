@@ -299,15 +299,20 @@ class FileTransferList(APIView):
 
         if "status" in request.GET:
             status_filter = request.GET["status"]
-        if "formed-at-range" in request.GET:
-            formed_at_range = list(
-                map(
-                    lambda x: datetime.strptime(x, "%Y-%m-%d"),
-                    request.GET["formed-at-range"].split(","),
+        try:
+            if "formed-at-range" in request.GET:
+                formed_at_range = list(
+                    map(
+                        lambda x: datetime.strptime(x, "%Y-%m-%d"),
+                        request.GET["formed-at-range"].split(","),
+                    )
                 )
-            )
-            formed_at_range[0] = make_aware(formed_at_range[0])
-            formed_at_range[1] = make_aware(formed_at_range[1])
+                formed_at_range[0] = make_aware(formed_at_range[0])
+                formed_at_range[1] = make_aware(formed_at_range[1])
+        except Exception:
+            print("Wrong date format detected. Returning nothing")
+            return []
+
         if status_filter:
             transfers = transfers.filter(status=status_filter)
         if formed_at_range:
