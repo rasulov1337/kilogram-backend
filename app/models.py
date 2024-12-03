@@ -123,8 +123,12 @@ class FileTransfer(models.Model):
 
 
 class FileTransferRecipient(models.Model):
-    file_transfer = models.ForeignKey(FileTransfer, on_delete=models.PROTECT)
-    recipient = models.ForeignKey(Recipient, on_delete=models.PROTECT)
+    file_transfer = models.ForeignKey(
+        FileTransfer, on_delete=models.PROTECT, related_name="file_transfers"
+    )
+    recipient = models.ForeignKey(
+        Recipient, on_delete=models.PROTECT, related_name="recipients"
+    )
     comment = models.CharField(max_length=200, blank=True, null=True)
     has_read = models.BooleanField(default=False)  # Is calculated on send
 
