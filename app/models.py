@@ -75,6 +75,7 @@ class FileTransferManager(models.Manager):
                     "phone": transfer_recipient.recipient.phone,
                     "avatar": transfer_recipient.recipient.avatar,
                     "comment": transfer_recipient.comment,
+                    "has_read": transfer_recipient.has_read,
                 }
             )
         return res
