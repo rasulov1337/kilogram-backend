@@ -5,7 +5,7 @@ import random
 import redis
 from django.contrib.auth import authenticate
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -125,9 +125,15 @@ class RecipientList(APIView):
         draftInfo = {"draftId": None, "draftRecipientsCount": 0}
 
         draft = FileTransfer.objects.get_draft(user.id)
+
         if draft:
             draftInfo["draftId"] = draft.id
-            draftInfo["draftRecipientsCount"] = len(draft.recipients.all())
+            draftInfo["draftRecipientsCount"] = (
+                Recipient.objects.filter(filetransfer=draft)
+                .aggregate(draft_recipients_count=Count("*"))
+                .get("draft_recipients_count")
+            )
+
         data.append(draftInfo)
         return Response(data)
 
