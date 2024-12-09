@@ -135,7 +135,7 @@ REST_FRAMEWORK = {
 
 STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-AWS_STORAGE_BUCKET_NAME = "rip-images"  # Бакет должен уже быть создан
+AWS_STORAGE_BUCKET_NAME = "images"  # Бакет должен уже быть создан
 AWS_ACCESS_KEY_ID = "minio"
 AWS_SECRET_ACCESS_KEY = "minio124"
 AWS_S3_ENDPOINT_URL = "127.0.0.1:9000"
