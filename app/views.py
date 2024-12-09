@@ -122,12 +122,12 @@ class RecipientList(APIView):
         serializer = self.serializer_class(recipients, many=True)
         data = serializer.data
 
-        draftInfo = {"draftId": None, "draftRecipientsLen": 0}
+        draftInfo = {"draftId": None, "draftRecipientsCount": 0}
 
         draft = FileTransfer.objects.get_draft(user.id)
         if draft:
             draftInfo["draftId"] = draft.id
-            draftInfo["draftRecipientsLen"] = len(draft.recipients.all())
+            draftInfo["draftRecipientsCount"] = len(draft.recipients.all())
         data.append(draftInfo)
         return Response(data)
 
@@ -325,7 +325,7 @@ class FileTransferDetails(APIView):
     serializer_class = FileTransferSerializer
     permission_classes = [IsAuthenticated]
 
-    def get(self, request: Request, transfer_id):
+    def get(self, request: Request, transfer_id: int):
         transfer = get_object_or_404(self.model_class, id=transfer_id)
         if (
             not request.user.is_staff
@@ -400,7 +400,10 @@ class FileTransferDetails(APIView):
             )
 
         if transfer.status != "DRF":
-            return Response({"error": "Can not delete transfer that is not draft"})
+            return Response(
+                {"error": "Can not delete transfer that is not draft"},
+                status.HTTP_400_BAD_REQUEST,
+            )
         if transfer.status == "DEL":
             return Response(
                 {"error": "Transfer already deleted"}, status.HTTP_400_BAD_REQUEST
@@ -512,12 +515,22 @@ class FileTransferDetailsComplete(APIView):
 class FileTransferRecipientDetails(APIView):
     model_class = FileTransferRecipient
     serializer_class = FileTransferRecipientSerializer
-    permission_classes = [IsModerator]
+    permission_classes = [IsAuthenticated]
 
     def delete(self, request: Request, transfer_id: int, recipient_id: int):
         transfer_recipient = get_object_or_404(
             self.model_class, file_transfer__id=transfer_id, recipient__id=recipient_id
         )
+        transfer = get_object_or_404(FileTransfer, id=transfer_id)
+
+        if (
+            not (request.user.is_staff or request.user.is_superuser)
+            and transfer.sender != request.user
+        ):
+            return Response(
+                {"error": "You do not have permissions to form this transfer"},
+                status.HTTP_403_FORBIDDEN,
+            )
 
         transfer_recipient.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -545,6 +558,13 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     model_class = CustomUser
+
+    @method_permission_classes([IsModerator, IsAuthenticated])
+    def retrieve(self, request, pk=None):
+        if str(request.user.id) != pk and not request.user.is_staff:
+            return Response({"error": "Forbidden"}, status.HTTP_403_FORBIDDEN)
+
+        return super().retrieve(request, pk)
 
     @method_permission_classes([IsAnon])
     def create(self, request):
@@ -586,11 +606,13 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         permission_classes = [IsAuthenticated]
-        if self.action == "update":
+        if self.action == "retrieve":
             permission_classes = [IsAuthenticated]
-        if self.action in ["list"]:
+        elif self.action == "update":
+            permission_classes = [IsAuthenticated]
+        elif self.action in ["list"]:
             permission_classes = [IsModerator]
-        if self.action in ["create"]:
+        elif self.action in ["create"]:
             permission_classes = [IsAnon]
         else:
             permission_classes = [IsAdmin]
@@ -640,3 +662,12 @@ def signout(request):
             {"status": "error", "error": "no session found"},
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+
+@permission_classes([IsAuthenticated])
+@swagger_auto_schema(method="GET", operation_description="Gets session info")
+@api_view(["GET"])
+def session(request):
+    user = request.user
+    response = Response({"username": user.username, "user_id": user.id})
+    return response
