@@ -20,6 +20,7 @@ from rest_framework.decorators import (
     api_view,
     authentication_classes,
     permission_classes,
+    action,
 )
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.request import Request
@@ -596,14 +597,15 @@ class UserViewSet(viewsets.ModelViewSet):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    @method_permission_classes([IsAuthenticated])
-    def put(self, request):
+    @action(detail=False, methods=["put"], permission_classes=[IsAuthenticated])
+    def update_profile(self, request):
         user = self.model_class.objects.get(id=request.user.id)
 
         serializer = self.serializer_class(
             partial=True, instance=user, data=request.data
         )
         if serializer.is_valid():
+            serializer.save()
             return Response({"status": "Success"}, status=200)
         return Response(
             {"status": "Error", "error": serializer.errors},
@@ -614,7 +616,7 @@ class UserViewSet(viewsets.ModelViewSet):
         permission_classes = [IsAuthenticated]
         if self.action == "retrieve":
             permission_classes = [IsAuthenticated]
-        elif self.action == "update":
+        elif self.action in ["update", "update_profile"]:
             permission_classes = [IsAuthenticated]
         elif self.action in ["list"]:
             permission_classes = [IsModerator]

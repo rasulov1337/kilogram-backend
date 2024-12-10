@@ -5,13 +5,26 @@ from app.models import CustomUser
 
 
 class UserSerializer(serializers.ModelSerializer):
-    is_staff = serializers.BooleanField(default=False, required=False)
-    is_superuser = serializers.BooleanField(default=False, required=False)
+    # is_staff = serializers.BooleanField(default=False, required=False)
+    # is_superuser = serializers.BooleanField(default=False, required=False)
 
     class Meta:
         model = CustomUser
-        fields = ["username", "password", "is_staff", "is_superuser"]
-        extra_kwargs = {"username": {"required": True}}
+        fields = [
+            "username",
+            "password",
+        ]
+        extra_kwargs = {
+            "username": {"required": True},
+            "password": {"write_only": True},
+        }
+
+    def update(self, instance, validated_data):
+        if "password" in validated_data:
+            password = validated_data.pop("password")
+            instance.set_password(password)  # Use set_password for hashing
+
+        return super().update(instance, validated_data)
 
 
 class RecipientSerializer(serializers.ModelSerializer):
