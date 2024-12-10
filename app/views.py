@@ -22,7 +22,11 @@ from rest_framework.decorators import (
     permission_classes,
     action,
 )
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+    AllowAny,
+)
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -633,6 +637,7 @@ class UserViewSet(viewsets.ModelViewSet):
     operation_description="Signs the user in",
 )
 @api_view(["POST"])
+@permission_classes([AllowAny])
 @authentication_classes([CsrfExemptSessionAuthentication])
 def signin(request):
     username = request.data.get("username", None)
