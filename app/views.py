@@ -633,7 +633,6 @@ class UserViewSet(viewsets.ModelViewSet):
     operation_description="Signs the user in",
 )
 @api_view(["POST"])
-@permission_classes([IsAnon])
 @authentication_classes([CsrfExemptSessionAuthentication])
 def signin(request):
     username = request.data.get("username", None)
@@ -643,9 +642,14 @@ def signin(request):
         random_key = str(uuid.uuid4())
         session_storage.set(random_key, user.id)
 
-        response = Response({"status": "ok"})
+        serializer = UserSerializer(user)
+        response = Response(serializer.data)
         response.set_cookie("session_id", random_key)
         response.set_cookie("csrftoken", get_token(request))
+
+        if request.user.is_authenticated:
+            session_id = request.COOKIES.get("session_id")
+            session_storage.delete(session_id)
 
         return response
     else:
@@ -670,12 +674,3 @@ def signout(request):
             {"status": "error", "error": "no session found"},
             status=status.HTTP_400_BAD_REQUEST,
         )
-
-
-@permission_classes([IsAuthenticated])
-@swagger_auto_schema(method="GET", operation_description="Gets session info")
-@api_view(["GET"])
-def session(request):
-    user = request.user
-    response = Response({"username": user.username, "user_id": user.id})
-    return response
