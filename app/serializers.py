@@ -43,6 +43,8 @@ class RecipientSerializer(serializers.ModelSerializer):
 
 
 class FileTransferSerializer(serializers.ModelSerializer):
+    has_read = serializers.SerializerMethodField()
+
     class Meta:
         model = FileTransfer
         fields = [
@@ -54,7 +56,10 @@ class FileTransferSerializer(serializers.ModelSerializer):
             "sender",
             "moderator",
             "file",
+            "has_read",
         ]
+
+        read_only_fields = ("has_read",)
 
     def to_representation(self, instance):
         repr = super().to_representation(instance)
@@ -63,6 +68,11 @@ class FileTransferSerializer(serializers.ModelSerializer):
             repr["moderator"] = CustomUser.objects.get(id=repr["moderator"]).username
 
         return repr
+
+    def get_has_read(self, obj):
+        return FileTransferRecipient.objects.filter(
+            file_transfer=obj, has_read=True
+        ).exists()
 
     def update(self, instance, validated_data):
         instance.file = validated_data.get("file", instance.file)
