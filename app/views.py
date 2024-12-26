@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
 
 import redis
@@ -318,6 +318,7 @@ class FileTransferList(APIView):
                         request.GET["formed-at-range"].split(","),
                     )
                 )
+                formed_at_range[1] += timedelta(days=1)
                 formed_at_range[0] = make_aware(formed_at_range[0])
                 formed_at_range[1] = make_aware(formed_at_range[1])
         except Exception:
