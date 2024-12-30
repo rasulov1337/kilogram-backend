@@ -15,9 +15,10 @@
 -   [Веб-сервис REST-API (лаб 3)](https://github.com/rasulov1337/kilogram-backend/tree/DRF)
 -   [Аутентификация и авторизация (лаб 4)](https://github.com/rasulov1337/kilogram-backend/tree/auth)
 
-# [Фронтенд](https://github.com/Andrest31/Parking_bmstu_frontend)
+## [Фронтенд](https://github.com/rasulov1337/kilogram-frontend)
 
 -   [SPA (лаб 5)](https://github.com/rasulov1337/kilogram-frontend/tree/spa)
 -   [Redux, адаптивность & PWA (лаб 6)](https://github.com/rasulov1337/kilogram-frontend/tree/redux)
 -   [Tauri (лаб 6 )](https://github.com/rasulov1337/kilogram-frontend/tree/tauri)
 -   [Github Pages (лаб 6)](https://github.com/rasulov1337/kilogram-frontend/tree/gh-pages)
+-   [Завершение интерфейса пользователя в React (лаб 7)](https://github.com/rasulov1337/kilogram-frontend/tree/auth)
