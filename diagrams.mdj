@@ -9889,9 +9889,9 @@
 												"$ref": "AAAAAAGSuKvyJBJPEmQ="
 											},
 											"font": "Arial;15;0",
-											"left": 50.84228515625,
+											"left": 48.33740234375,
 											"top": 13,
-											"width": 234.47021484375,
+											"width": 210.64453125,
 											"height": 15,
 											"text": "Диаграмма последовательностей"
 										},
@@ -9904,7 +9904,7 @@
 											"font": "Arial;15;1",
 											"left": 29,
 											"top": 13,
-											"width": 15.84228515625,
+											"width": 13.33740234375,
 											"height": 15,
 											"text": "sd"
 										}
@@ -11780,9 +11780,9 @@
 												"$ref": "AAAAAAGSuKvyJRL3DAA="
 											},
 											"font": "Arial;15;0",
-											"left": 237,
+											"left": 249,
 											"top": 707,
-											"width": 214.37255859375,
+											"width": 191.396484375,
 											"height": 15,
 											"autoResize": true,
 											"alpha": 1.3734017284836624,
@@ -12241,9 +12241,9 @@
 												"$ref": "AAAAAAGSuKvyJRL5J3M="
 											},
 											"font": "Arial;15;0",
-											"left": 212,
+											"left": 215,
 											"top": 799,
-											"width": 83.88427734375,
+											"width": 76.875,
 											"height": 15,
 											"autoResize": true,
 											"alpha": 1.3521284397447333,
@@ -12467,9 +12467,9 @@
 											},
 											"font": "Arial;15;0",
 											"left": 102,
-											"top": 888,
+											"top": 895,
 											"width": 305,
-											"height": 45,
+											"height": 30,
 											"alpha": 1.5350975708034753,
 											"distance": 28.0178514522438,
 											"hostEdge": {
@@ -12808,9 +12808,9 @@
 											"font": "Arial;15;0",
 											"showShadow": false,
 											"left": 101,
-											"top": 961,
+											"top": 968,
 											"width": 312,
-											"height": 45,
+											"height": 30,
 											"alpha": 1.5102640050914775,
 											"distance": 33.06055050963308,
 											"hostEdge": {
@@ -13850,7 +13850,7 @@
 											"left": 477,
 											"top": 143,
 											"width": 111,
-											"height": 39,
+											"height": 26,
 											"text": "Страница текущей отправки",
 											"wordWrap": true
 										},
@@ -13886,7 +13886,7 @@
 									"left": 472,
 									"top": 136,
 									"width": 121,
-									"height": 51,
+									"height": 38,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGTJjwtlaSD/9A="
 									},
@@ -13911,7 +13911,7 @@
 									},
 									"font": "Arial;13;0",
 									"left": 472,
-									"top": 187,
+									"top": 174,
 									"width": 121,
 									"height": 10
 								},
@@ -13926,7 +13926,7 @@
 									},
 									"font": "Arial;13;0",
 									"left": 472,
-									"top": 197,
+									"top": 184,
 									"width": 121,
 									"height": 10
 								},
@@ -14029,7 +14029,7 @@
 											"left": 477,
 											"top": 223,
 											"width": 111,
-											"height": 39,
+											"height": 26,
 											"text": "Страница история отправок",
 											"wordWrap": true
 										},
@@ -14065,7 +14065,7 @@
 									"left": 472,
 									"top": 216,
 									"width": 121,
-									"height": 51,
+									"height": 38,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGTJjwtlqSNbPU="
 									},
@@ -14090,7 +14090,7 @@
 									},
 									"font": "Arial;13;0",
 									"left": 472,
-									"top": 267,
+									"top": 254,
 									"width": 121,
 									"height": 10
 								},
@@ -14105,7 +14105,7 @@
 									},
 									"font": "Arial;13;0",
 									"left": 472,
-									"top": 277,
+									"top": 264,
 									"width": 121,
 									"height": 10
 								},
@@ -14387,7 +14387,7 @@
 											"left": 477,
 											"top": 383,
 											"width": 111,
-											"height": 39,
+											"height": 26,
 											"text": "Страница одного получателя",
 											"wordWrap": true
 										},
@@ -14423,7 +14423,7 @@
 									"left": 472,
 									"top": 376,
 									"width": 121,
-									"height": 51,
+									"height": 38,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGTJjwtlqShhV8="
 									},
@@ -14448,7 +14448,7 @@
 									},
 									"font": "Arial;13;0",
 									"left": 472,
-									"top": 427,
+									"top": 414,
 									"width": 121,
 									"height": 10
 								},
@@ -14463,7 +14463,7 @@
 									},
 									"font": "Arial;13;0",
 									"left": 472,
-									"top": 437,
+									"top": 424,
 									"width": 121,
 									"height": 10
 								},
@@ -15666,7 +15666,7 @@
 											"left": 749,
 											"top": 191,
 											"width": 191,
-											"height": 26,
+											"height": 13,
 											"text": "+PUT update_transfer_recipient(id)",
 											"horizontalAlignment": 0,
 											"wordWrap": true
@@ -15682,7 +15682,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 749,
-											"top": 219,
+											"top": 206,
 											"width": 191,
 											"height": 26,
 											"text": "+DELETE delete_transfer_recipient(id)",
@@ -15694,7 +15694,7 @@
 									"left": 744,
 									"top": 186,
 									"width": 201,
-									"height": 64
+									"height": 51
 								},
 								{
 									"_type": "UMLReceptionCompartmentView",
@@ -15795,7 +15795,7 @@
 											"left": 749,
 											"top": 279,
 											"width": 191,
-											"height": 26,
+											"height": 13,
 											"text": "Домен Процесс отправки файла",
 											"wordWrap": true
 										},
@@ -15807,7 +15807,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 749,
-											"top": 307,
+											"top": 294,
 											"width": 191,
 											"height": 13,
 											"text": "(from Бэкэнд)"
@@ -15830,7 +15830,7 @@
 									"left": 744,
 									"top": 272,
 									"width": 201,
-									"height": 53,
+									"height": 40,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGTSHKaPIsMe9k="
 									},
@@ -15855,7 +15855,7 @@
 									},
 									"font": "Arial;13;0",
 									"left": 744,
-									"top": 325,
+									"top": 312,
 									"width": 201,
 									"height": 10
 								},
@@ -15880,7 +15880,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 749,
-											"top": 340,
+											"top": 327,
 											"width": 191,
 											"height": 13,
 											"text": "+GET get_transfers()",
@@ -15897,7 +15897,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 749,
-											"top": 355,
+											"top": 342,
 											"width": 191,
 											"height": 13,
 											"text": "+GET get_transfer(id)",
@@ -15914,7 +15914,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 749,
-											"top": 370,
+											"top": 357,
 											"width": 191,
 											"height": 13,
 											"text": "+PUT update(id)",
@@ -15931,7 +15931,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 749,
-											"top": 385,
+											"top": 372,
 											"width": 191,
 											"height": 13,
 											"text": "+PUT form(id)",
@@ -15948,7 +15948,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 749,
-											"top": 400,
+											"top": 387,
 											"width": 191,
 											"height": 13,
 											"text": "+PUT complete(id)",
@@ -15965,7 +15965,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 749,
-											"top": 415,
+											"top": 402,
 											"width": 191,
 											"height": 13,
 											"text": "+DELETE delete(id)",
@@ -15974,7 +15974,7 @@
 									],
 									"font": "Arial;13;0",
 									"left": 744,
-									"top": 335,
+									"top": 322,
 									"width": 201,
 									"height": 98
 								},
@@ -16502,7 +16502,7 @@
 											"left": 477,
 											"top": 847,
 											"width": 111,
-											"height": 26,
+											"height": 13,
 											"text": "Главная страница",
 											"wordWrap": true
 										},
@@ -16538,7 +16538,7 @@
 									"left": 472,
 									"top": 840,
 									"width": 121,
-									"height": 38,
+									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGTSHg55I07gL8="
 									},
@@ -16563,7 +16563,7 @@
 									},
 									"font": "Arial;13;0",
 									"left": 472,
-									"top": 878,
+									"top": 865,
 									"width": 121,
 									"height": 10
 								},
@@ -16578,7 +16578,7 @@
 									},
 									"font": "Arial;13;0",
 									"left": 472,
-									"top": 888,
+									"top": 875,
 									"width": 121,
 									"height": 10
 								},
@@ -24230,9 +24230,9 @@
 											},
 											"font": "Arial;13;1",
 											"left": 416,
-											"top": 481.5,
+											"top": 488,
 											"width": 120,
-											"height": 39,
+											"height": 26,
 											"text": "Посмотреть список получателей",
 											"wordWrap": true
 										},
@@ -24266,9 +24266,9 @@
 									],
 									"font": "Arial;13;0",
 									"left": 411,
-									"top": 474.5,
+									"top": 481,
 									"width": 130,
-									"height": 51,
+									"height": 38,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGTtWymFWqc9NM="
 									},
@@ -25862,9 +25862,9 @@
 											},
 											"font": "Arial;13;1",
 											"left": 752,
-											"top": 679,
+											"top": 685.5,
 											"width": 74,
-											"height": 52,
+											"height": 39,
 											"text": "Удалить получателя из отправки",
 											"wordWrap": true
 										},
@@ -25898,9 +25898,9 @@
 									],
 									"font": "Arial;13;0",
 									"left": 747,
-									"top": 672,
-									"width": 85.00390625,
-									"height": 64,
+									"top": 678.5,
+									"width": 84,
+									"height": 51,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGTtWymFmrwhIQ="
 									},
@@ -26103,7 +26103,7 @@
 									"font": "Arial;13;0",
 									"left": 550.5,
 									"top": 633,
-									"width": 68.73486328125,
+									"width": 68,
 									"height": 38,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGTtWymFmr75Tw="
@@ -26270,9 +26270,9 @@
 											},
 											"font": "Arial;13;1",
 											"left": 596,
-											"top": 705.5,
+											"top": 712,
 											"width": 98,
-											"height": 39,
+											"height": 26,
 											"text": "Сформировать отправку файла",
 											"wordWrap": true
 										},
@@ -26306,9 +26306,9 @@
 									],
 									"font": "Arial;13;0",
 									"left": 591,
-									"top": 698.5,
-									"width": 109.02978515625,
-									"height": 51,
+									"top": 705,
+									"width": 108,
+									"height": 38,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGTtWymFmsG+Mg="
 									},
@@ -27809,7 +27809,7 @@
 									"font": "Arial;13;0",
 									"left": 424,
 									"top": 725,
-									"width": 115.58056640625,
+									"width": 115,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGTtWymFmtMH5I="
@@ -28202,7 +28202,7 @@
 									"font": "Arial;13;0",
 									"left": 412,
 									"top": 861,
-									"width": 95.0712890625,
+									"width": 94,
 									"height": 64,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGTtWymFmtfTRM="
@@ -28609,7 +28609,7 @@
 									"font": "Arial;13;0",
 									"left": 560,
 									"top": 925,
-									"width": 115.58056640625,
+									"width": 115,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGTtWymFmt1vCQ="
@@ -29597,7 +29597,7 @@
 									"font": "Arial;13;0",
 									"left": 746,
 									"top": 951.5,
-									"width": 85.00390625,
+									"width": 84,
 									"height": 38,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGTtWymFmumzig="
@@ -29801,7 +29801,7 @@
 									"font": "Arial;13;0",
 									"left": 570,
 									"top": 1055.5,
-									"width": 85.00390625,
+									"width": 84,
 									"height": 38,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGTtWymF2uxeI0="
@@ -30000,7 +30000,7 @@
 									"font": "Arial;13;0",
 									"left": 678.5,
 									"top": 1015.5,
-									"width": 107.21435546875,
+									"width": 106,
 									"height": 38,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGTtWymF2u8rDw="
@@ -34477,9 +34477,9 @@
 														"$ref": "AAAAAAGTtXbY98p40mo="
 													},
 													"font": "Arial;13;0",
-													"left": 169,
+													"left": 168,
 													"top": 401,
-													"width": 72.01416015625,
+													"width": 74.318359375,
 													"height": 26,
 													"alpha": -2.455862896786324,
 													"distance": 71.06335201775947,
@@ -34487,7 +34487,7 @@
 														"$ref": "AAAAAAGTtXbY98olbkI="
 													},
 													"edgePosition": 1,
-													"text": "продолжить выбор",
+													"text": "Продолжить выбор",
 													"wordWrap": true
 												},
 												{
@@ -36468,6 +36468,58 @@
 											"propertyLabel": {
 												"$ref": "AAAAAAGT7/ajRyVuEiQ="
 											}
+										},
+										{
+											"_type": "UMLTextView",
+											"_id": "AAAAAAGUKPu3VzUrBWs=",
+											"_parent": {
+												"$ref": "AAAAAAGTtXbY98oKJ3Q="
+											},
+											"font": "Arial;13;0",
+											"left": 184,
+											"top": 616,
+											"width": 60,
+											"height": 38
+										},
+										{
+											"_type": "UMLTextView",
+											"_id": "AAAAAAGUKPyFwTU12XA=",
+											"_parent": {
+												"$ref": "AAAAAAGTtXbY98oKJ3Q="
+											},
+											"font": "Arial;13;0",
+											"left": 328,
+											"top": 616,
+											"width": 60,
+											"height": 15
+										},
+										{
+											"_type": "UMLTextView",
+											"_id": "AAAAAAGUKQsIRDU66OA=",
+											"_parent": {
+												"$ref": "AAAAAAGTtXbY98oKJ3Q="
+											},
+											"font": "Arial;13;0",
+											"left": 312,
+											"top": 624,
+											"width": 67.6748046875,
+											"height": 38,
+											"text": "Отправка готова",
+											"horzAlign": 2
+										},
+										{
+											"_type": "UMLTextView",
+											"_id": "AAAAAAGUKQtQpjVAHjc=",
+											"_parent": {
+												"$ref": "AAAAAAGTtXbY98oKJ3Q="
+											},
+											"font": "Arial;13;0",
+											"left": 192,
+											"top": 616,
+											"width": 69.89013671875,
+											"height": 51,
+											"text": "Отправка подлежит удалению",
+											"horzAlign": 2
 										}
 									]
 								}
@@ -36645,7 +36697,7 @@
 									"_parent": {
 										"$ref": "AAAAAAGTtXbY98oJZHQ="
 									},
-									"name": "продолжить выбор",
+									"name": "Продолжить выбор",
 									"source": {
 										"$ref": "AAAAAAGTtXbY98qFcUM="
 									},
